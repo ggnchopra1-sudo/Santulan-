@@ -334,6 +334,32 @@ footer{font-size:12px;color:var(--muted);margin-top:26px;border-top:1px solid va
 .builtwith{justify-self:center;display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:8px 16px;border-radius:99px;background:var(--card);box-shadow:var(--shadow);font-family:var(--f-display);font-weight:600;font-size:13.5px;letter-spacing:-.01em;color:var(--ink)}
 .builtwith .spark{width:22px;height:22px;border-radius:50%;background:#0E3B2A;color:#C8F250;display:grid;place-items:center;font-size:12px}
 .builtwith.sm{margin-top:12px;font-size:12px;padding:6px 12px}
+
+/* victory moment */
+.btn,.opt,.tile,.slotbtn,.getstarted,.nextlink,.fab{transition:transform .14s ease,background-color .2s,box-shadow .2s}
+.btn:active,.opt:active,.tile:active,.slotbtn:active,.nextlink:active{transform:scale(.97)}
+.celebrate{position:relative;overflow:hidden;animation:doneIn .6s cubic-bezier(.2,.9,.25,1.12) both}
+@keyframes doneIn{from{transform:translateY(14px) scale(.965)}to{transform:none}}
+.done-head{display:flex;align-items:center;gap:10px}
+.check{width:34px;height:34px;flex:none}
+.check circle{fill:#0E3B2A;stroke:none;transform-origin:center;animation:popC .45s cubic-bezier(.3,1.6,.5,1) .05s both}
+.check path{fill:none;stroke:#C8F250;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:36;stroke-dashoffset:36;animation:tick .4s ease-out .32s forwards}
+@keyframes popC{from{transform:scale(.2)}to{transform:scale(1)}}
+@keyframes tick{to{stroke-dashoffset:0}}
+.burst{position:absolute;left:37px;top:37px;width:0;height:0;pointer-events:none;z-index:2}
+.burst i{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;opacity:0;animation:pop .85s cubic-bezier(.15,.7,.3,1) both}
+.burst i.dash{width:10px;height:3px;border-radius:2px;left:-5px;top:-1.5px}
+@keyframes pop{0%{opacity:0;transform:translate(0,0) rotate(0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(1)}}
+.dayprog{margin:2px 0 14px}
+.dp-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
+.dp-top span{opacity:.75}
+.dp-track{height:10px;border-radius:99px;background:rgba(14,59,42,.15);overflow:hidden}
+.dp-fill{height:100%;border-radius:99px;background:#0E3B2A;transition:width 1s cubic-bezier(.2,.8,.2,1) .35s}
+.toast:not([hidden]){animation:toastIn .38s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes toastIn{from{transform:translate(-50%,10px) scale(.94)}to{transform:translate(-50%,0) scale(1)}}
+.toast::before{content:"✓";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#0E3B2A;color:#C8F250;font-size:11px;margin-right:8px;vertical-align:-3px}
+@media (prefers-reduced-motion:reduce){.celebrate,.check circle,.check path,.toast:not([hidden]),.burst i{animation:none!important}.check path{stroke-dashoffset:0}.dp-fill{transition:none}}
+
 /* loading + onboarding */
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding-block:30vh 0;font-family:var(--f-display);font-weight:700;font-size:22px;color:var(--olive);letter-spacing:-.03em}
 .loading .mark{width:56px;height:56px}
@@ -907,10 +933,18 @@ function renderLog(){
   const body=document.getElementById('logBody');
   if(logDone){
     const m=logDone, slotName=SLOTS.find(s=>s.k===m.slot).name.toLowerCase();
-    body.innerHTML=`<div class="done"><span class="label" style="color:inherit;opacity:.7">Added to ${slotName} · ${dateLabel(S.date)}</span>
-      <h3>${esc(m.name)}</h3><div class="num" style="font-size:13.5px;opacity:.8">${fmt(m.n.kcal)} kcal · ${fmt(m.n.p)} g protein · ${fmt(m.n.fib)} g fibre</div>
+    const T=targets(), after=sum(S.day.meals), beforeP=Math.max(0,after.p-m.n.p);
+    const pBefore=Math.min(100,beforeP/T.p*100), pAfter=Math.min(100,after.p/T.p*100);
+    body.innerHTML=`<div class="done celebrate">
+      <div class="burst" aria-hidden="true"></div>
+      <div class="done-head"><svg class="check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23"/><path d="M15 27l7 7 15-16"/></svg>
+        <span class="label" style="color:inherit;opacity:.7">Added to ${slotName} · ${dateLabel(S.date)}</span></div>
+      <h3>${esc(m.name)}</h3><div class="num" style="font-size:13.5px;opacity:.8"><span data-count="${Math.round(m.n.kcal)}">0</span> kcal · <span data-count="${Math.round(m.n.p)}">0</span> g protein · <span data-count="${Math.round(m.n.fib)}">0</span> g fibre</div>
       <div class="chips">${mealChips(m.n)}</div>
+      <div class="dayprog"><div class="dp-top"><span>Protein today</span><b class="num"><span data-count="${Math.round(after.p)}" data-from="${Math.round(beforeP)}">${Math.round(beforeP)}</span> / ${T.p} g</b></div>
+        <div class="dp-track"><div class="dp-fill" style="width:${pBefore}%" data-to="${pAfter}"></div></div></div>
       <div class="row"><button class="btn primary" data-lact="dash">Open dashboard</button><button class="btn" data-lact="again">Log another</button><button class="btn" data-lact="home">Home</button></div></div>`;
+    celebrate(body.querySelector('.celebrate'));
     return;
   }
   const loggedCount=k=>S.day.meals.filter(m=>m.slot===k).length;
@@ -1042,7 +1076,7 @@ function addFood(id,slot,mult=1){
   const pl = mult===1? f.serving : `${f.serving} × ${mult}`;
   return addMeal({foodId:f.id,name:f.name,n:scaled(f,mult),slot,portionLabel:pl});
 }
-let toastT; function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
+let toastT; function toast(t){ const el=document.getElementById('toast'); el.hidden=true; void el.offsetWidth; if(/^Added/.test(t)) haptic(); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
 
 /* ---------- AI plan ---------- */
 async function askPlan(){
@@ -1199,6 +1233,40 @@ document.getElementById('restoreFile').addEventListener('change',async e=>{
 /* ---------- offline support ---------- */
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+
+/* ---------- victory moment ---------- */
+const REDUCED = (()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } })();
+function haptic(){ try{ if(navigator.vibrate) navigator.vibrate([10,40,16]); }catch(e){} }
+function countUp(el){
+  const to=+el.dataset.count, from=+(el.dataset.from||0);
+  if(REDUCED){ el.textContent=to; return; }
+  const t0=performance.now(), dur=750;
+  const step=t=>{ const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=Math.round(from+(to-from)*e); if(k<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function celebrate(card){
+  if(!card) return;
+  haptic();
+  card.querySelectorAll('[data-count]').forEach(countUp);
+  const fill=card.querySelector('.dp-fill');
+  if(fill) requestAnimationFrame(()=>requestAnimationFrame(()=>{ fill.style.width=fill.dataset.to+'%'; }));
+  if(REDUCED) return;
+  const burst=card.querySelector('.burst'); if(!burst) return;
+  const colors=['#0E3B2A','#FFFFFF','#0E3B2A','#F4F7EC'];
+  for(let i=0;i<14;i++){
+    const s=document.createElement('i');
+    const a=(Math.PI*2)*(i/14)+Math.random()*0.4, d=38+Math.random()*34;
+    s.style.setProperty('--dx',(Math.cos(a)*d).toFixed(1)+'px');
+    s.style.setProperty('--dy',(Math.sin(a)*d).toFixed(1)+'px');
+    s.style.setProperty('--r',(Math.random()*180-90).toFixed(0)+'deg');
+    s.style.background=colors[i%colors.length];
+    s.style.animationDelay=(0.32+Math.random()*0.08).toFixed(2)+'s';
+    if(i%3===0) s.className='dash';
+    burst.appendChild(s);
+  }
+  setTimeout(()=>{ burst.innerHTML=''; },1600);
 }
 
 /* ---------- boot ---------- */
