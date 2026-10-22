@@ -591,6 +591,48 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 .install{background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);display:grid;gap:12px;border:2px solid var(--lime)}
 .install-how{font-size:13.5px;line-height:1.5;background:var(--ivory-2);border-radius:14px;padding:10px 12px}
 .install-how b{font-weight:700}
+
+/* log flow: one question per screen */
+.slotline{display:flex;align-items:center;gap:10px;margin-top:2px}
+.slotchip{border:0;background:var(--card);box-shadow:var(--shadow);border-radius:99px;padding:8px 14px;font-weight:500;font-size:14px;display:inline-flex;gap:6px;align-items:center;color:var(--muted)}
+.slotchip b{color:var(--ink);font-weight:700}
+.slotchip .caret{font-size:11px;color:var(--muted);transition:transform .2s}
+.slotchip[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.pastday{font-size:12.5px;font-weight:600;color:var(--warn)}
+.slotpick{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.slotpick button{border:1.5px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font-weight:600;font-size:14px}
+.slotpick button small{font-size:11px;background:var(--ivory-2);border-radius:99px;padding:1px 6px;margin-left:2px}
+.slotpick button[aria-pressed="true"]{background:var(--forest);border-color:var(--forest);color:var(--lime)}
+.slotpick button[aria-pressed="true"] small{background:rgba(200,242,80,.18)}
+.ask{font-family:var(--f-display);font-weight:600;font-size:30px;letter-spacing:-.035em;margin:26px 0 14px;line-height:1.1}
+.bigin{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:16px}
+.bigin textarea{width:100%;border:0;background:transparent;font:inherit;font-size:19px;line-height:1.4;min-height:92px;resize:none;color:var(--ink);padding:2px}
+.bigin textarea:focus-visible{outline:none}
+.bigin textarea::placeholder{color:var(--muted);opacity:.75}
+.bigin-row{display:flex;gap:10px;align-items:center;margin-top:10px}
+.mic.big{width:56px;height:56px}
+.mic.big svg{width:24px;height:24px}
+.cta{flex:1;border:0;border-radius:99px;background:var(--forest);color:var(--lime);font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:-.01em;padding:0 22px;height:56px;display:flex;justify-content:space-between;align-items:center}
+.cta:active{transform:scale(.98)}
+.qpwrap{margin-top:30px}
+.qplist{display:grid;gap:8px;margin-top:10px}
+.qpitem{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;background:var(--card);border-radius:18px;padding:12px 12px 12px 16px;box-shadow:var(--shadow);text-align:left;width:100%;color:var(--ink)}
+.qpitem>span:first-child{display:flex;flex-direction:column;min-width:0}
+.qpitem small{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qpitem b{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qpitem em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.qpitem .plus{width:36px;height:36px;border-radius:50%;background:var(--lime);color:var(--lime-ink);display:grid;place-items:center;font-size:20px;flex:none}
+.qpitem.yday{background:var(--pista-soft)}
+.qpitem:active{transform:scale(.98)}
+.textlink{display:block;border:0;background:none;color:var(--olive);font-weight:600;padding:22px 0 8px;width:100%;text-align:center;font-size:14.5px}
+.reviewcard{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:6px 16px 16px}
+.reviewcard .preview{margin-top:0;border-top:0}
+.reviewcard #addParsed{width:100%;padding:16px;font-size:17px;font-family:var(--f-display);border-radius:99px}
+.reviewcard .row:has(#addParsed){position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 12px)}
+.listtop{display:flex;gap:8px;margin-top:18px}
+.listtop .search{flex:1}
+.filterbtn{border:0;background:var(--card);box-shadow:var(--shadow);border-radius:99px;padding:0 16px;font-weight:600;font-size:14px;color:var(--muted)}
+.filterbtn.on{background:var(--lime);color:var(--lime-ink)}
 </style>
 </head>
 <body>
@@ -918,6 +960,7 @@ const S = { date: todayKey(), day: emptyDay(), weight: 68, name: '', profile: nu
 let onbIdx=0, onbAns={}, focusIdx=0;
 let store = { kind:'local' }, sample = null;
 let parsed=null, mealDraft='', listLimit=30;
+let logStep='input', slotOpen=false, filterOpen=false;
 let logSlot = 'b', logPortion = 1, logFilter = 'all', aiPreview = null, aiPlanText = '', logDone = null, logReturn = 'home';
 let factIdx = (Math.floor(Date.now()/86400000)) % FACTS.length;
 
@@ -1388,7 +1431,7 @@ function currentSlot(){ const h=nowHour(); return h<11?'b':h<16?'l':h<19.5?'s':'
 async function openLog(slot, fromDash=false){
   if(!fromDash && !isToday()){ S.date=todayKey(); S.day=await loadDay(S.date); }
   logReturn = fromDash ? 'dash' : 'home';
-  logSlot = slot || (isToday()?currentSlot():'l'); YDAY=null; loadYesterday().then(()=>{ if(S.screen==='log' && !logDone) renderLog(); }); logPortion=1; logFilter='all'; aiPreview=null; logDone=null; parsed=null; mealDraft=''; listLimit=30;
+  logSlot = slot || (isToday()?currentSlot():'l'); YDAY=null; loadYesterday().then(()=>{ if(S.screen==='log' && !logDone) renderLog(); }); logPortion=1; logFilter='all'; aiPreview=null; logDone=null; parsed=null; mealDraft=''; listLimit=30; logStep='input'; slotOpen=false; filterOpen=false;
   show('log');
 }
 function renderLog(){
@@ -1410,27 +1453,31 @@ function renderLog(){
     return;
   }
   const loggedCount=k=>S.day.meals.filter(m=>m.slot===k).length;
-  let h=`<div class="logfor">Logging for ${dateLabel(S.date).toLowerCase()}${isVegDay()?' · veg day':''}</div>
-  <div class="step"><span class="label">Which meal?</span><div class="slotgrid">
-    ${SLOTS.map(s=>`<button class="slotbtn" aria-pressed="${s.k===logSlot}" data-lslot="${s.k}"><b>${s.name}</b><small>${loggedCount(s.k)?`${loggedCount(s.k)} logged`:s.time}</small></button>`).join('')}
-  </div></div>
-  ${quickPicksHtml()}
-  <div class="step"><span class="label">What did you eat?</span>
-    <div class="custom"><textarea id="mealText" placeholder="Type it the way you'd say it, e.g. 2 roti, dal makhani aur thoda chawal">${esc(mealDraft)}</textarea>
-      <div class="row" style="margin-top:8px"><button class="btn primary" id="matchBtn">Work it out</button>${VOICE_OK?`<button class="mic" id="micBtn" aria-label="Speak your meal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<span class="note" style="margin:0">${VOICE_OK?'Type or speak':'Works offline'}</span></div>
-      <div id="parsedArea"></div></div>
-  </div>
-  <div class="step"><span class="label">Or pick from the list</span>
-    <input class="search" id="lsearch" placeholder="Search ${FOODS.length} dishes: dal, paneer, anda…" autocomplete="off">
-    <div class="filters" id="lfilters" style="margin-top:10px">${[['all','All'],['fits','Fits this meal'],['protein','High protein'],['b12','B12'],['d','Vit D'],['iron','Iron'],['fibre','Fibre'],['veg','Veg only']].map(([k,l])=>`<button aria-pressed="${k===logFilter}" data-lfilter="${k}">${l}</button>`).join('')}</div>
-    <div class="seg" style="margin-top:10px">${PORTIONS.map(([v,l])=>`<button aria-pressed="${v===logPortion}" data-lportion="${v}">${l}</button>`).join('')}</div>
-  </div>
-  <div class="loglist" id="foodList"></div>`;
+  const slot=SLOTS.find(s=>s.k===logSlot);
+  const pastNote = !isToday() ? `<span class="pastday">${esc(dateLabel(S.date))}</span>` : '';
+  const slotHtml = `<div class="slotline"><button class="slotchip" id="slotChip" aria-expanded="${slotOpen}">For <b>${slot.name}</b><span class="caret" aria-hidden="true">▾</span></button>${pastNote}</div>
+    ${slotOpen?`<div class="slotpick">${SLOTS.map(s=>`<button aria-pressed="${s.k===logSlot}" data-lslot="${s.k}">${s.name}${loggedCount(s.k)?` <small>${loggedCount(s.k)}</small>`:''}</button>`).join('')}</div>`:''}`;
+  let h='';
+  if(logStep==='review'){
+    h=`${slotHtml}<h3 class="ask">Here's what I got</h3>
+      <div class="reviewcard"><div id="parsedArea"></div></div>
+      <button class="textlink" data-lstep="input">Edit what I typed</button>`;
+  } else if(logStep==='list'){
+    h=`${slotHtml}<div class="listtop"><input class="search" id="lsearch" placeholder="Search ${FOODS.length} dishes" autocomplete="off"><button class="filterbtn ${logFilter!=='all'?'on':''}" id="filterBtn" aria-expanded="${filterOpen}">Filter${logFilter!=='all'?' · 1':''}</button></div>
+      ${filterOpen?`<div class="filters" id="lfilters" style="margin-top:10px;flex-wrap:wrap">${[['all','All'],['fits','Fits '+slot.name.toLowerCase()],['protein','High protein'],['b12','B12'],['d','Vit D'],['iron','Iron'],['fibre','Fibre'],['veg','Veg only']].map(([k,l])=>`<button aria-pressed="${k===logFilter}" data-lfilter="${k}">${l}</button>`).join('')}</div>`:''}
+      <div class="loglist" id="foodList" style="margin-top:12px"></div>`;
+  } else {
+    h=`${slotHtml}<h3 class="ask">What did you eat?</h3>
+      <div class="bigin"><textarea id="mealText" rows="3" placeholder="e.g. 2 roti, dal makhani aur thoda chawal">${esc(mealDraft)}</textarea>
+        <div class="bigin-row">${VOICE_OK?`<button class="mic big" id="micBtn" aria-label="Speak your meal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="cta" id="matchBtn"><span>Next</span><span aria-hidden="true">→</span></button></div></div>
+      ${quickPicksHtml()}
+      <button class="textlink" data-lstep="list">Pick from the list instead →</button>`;
+  }
   const q=(document.getElementById('lsearch')||{}).value||'';
   body.innerHTML=h;
-  const si=document.getElementById('lsearch'); si.value=q; si.addEventListener('input',renderFoodList);
-  const mt=document.getElementById('mealText'); mt.addEventListener('input',()=>{ mealDraft=mt.value; });
-  renderParsed(); renderFoodList();
+  const si=document.getElementById('lsearch'); if(si){ si.value=q; si.addEventListener('input',renderFoodList); renderFoodList(); }
+  const mt=document.getElementById('mealText'); if(mt) mt.addEventListener('input',()=>{ mealDraft=mt.value; });
+  if(logStep==='review') renderParsed();
 }
 function renderCustom(){ renderParsed(); }
 
@@ -1672,7 +1719,7 @@ function renderParsed(){
       <div class="est-grid">${Object.entries(EST_TYPES).map(([k,t])=>`<button data-est="${k}">${t.label}</button>`).join('')}</div>${left.length>1?`<div class="pleft">Also not recognised: ${left.slice(1).map(esc).join(', ')}</div>`:''}</div>`;
     if(sample) h+=`<button class="btn" id="estimateLeft" style="margin-top:8px">Estimate “${esc(left.join(', ')).slice(0,40)}” with AI</button>`;
   }
-  if(!items.length && !left.length) h+=`<div class="pleft">Type what you ate first.</div>`;
+  if(!items.length && !left.length) h+=`<div class="pleft">Nothing here yet. Go back and type what you ate.</div>`;
   if(items.length) h+=`<div class="row" style="margin-top:12px"><button class="btn pista" id="addParsed">Add to ${SLOTS.find(s=>s.k===logSlot).name.toLowerCase()}</button></div>`;
   h+='</div>'; a.innerHTML=h;
 }
@@ -1768,7 +1815,7 @@ let scrollToReport=false;
 if(document.getElementById('goReport')) document.getElementById('goReport').onclick=async()=>{ S.tab='week'; scrollToReport=true; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 document.getElementById('goNext').onclick=async()=>{ S.tab='plan'; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));
-document.getElementById('logBack').onclick=()=>show(logReturn);
+document.getElementById('logBack').onclick=()=>{ if(!logDone && logStep!=='input'){ logStep='input'; if(parsed && !parsed.items.length) parsed=null; renderLog(); window.scrollTo({top:0}); return; } show(logReturn); };
 document.querySelector('nav.tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; S.tab=b.dataset.tab; render(); });
 document.getElementById('prevDay').onclick=()=>goDate(shiftKey(S.date,-1));
 document.getElementById('nextDay').onclick=()=>{ if(!isToday()) goDate(shiftKey(S.date,1)); };
@@ -1788,11 +1835,14 @@ view.addEventListener('click',async e=>{
 });
 document.getElementById('logBody').addEventListener('click',async e=>{
   const t=e.target.closest('button'); if(!t) return;
-  if(t.dataset.lslot){ logSlot=t.dataset.lslot; renderLog(); }
+  if(t.id==='slotChip'){ slotOpen=!slotOpen; renderLog(); }
+  else if(t.id==='filterBtn'){ filterOpen=!filterOpen; renderLog(); }
+  else if(t.dataset.lstep){ logStep=t.dataset.lstep; renderLog(); window.scrollTo({top:0}); if(logStep==='list') setTimeout(()=>{ const si=document.getElementById('lsearch'); if(si) si.focus(); },50); }
+  else if(t.dataset.lslot){ logSlot=t.dataset.lslot; slotOpen=false; renderLog(); }
   else if(t.dataset.lportion){ logPortion=Number(t.dataset.lportion); renderLog(); }
   else if(t.dataset.lfilter){ logFilter=t.dataset.lfilter; renderLog(); }
-  else if(t.dataset.addfood){ logDone=addFood(t.dataset.addfood, logSlot, logPortion); window.scrollTo({top:0}); renderLog(); }
-  else if(t.id==='matchBtn'){ mealDraft=document.getElementById('mealText').value; parsed=parseMeal(mealDraft); renderParsed(); }
+  else if(t.dataset.addfood){ const f=FOODS.find(x=>x.id===t.dataset.addfood); if(f){ parsed={items:[{food:f,mult:1}],left:[]}; logStep='review'; renderLog(); window.scrollTo({top:0}); } }
+  else if(t.id==='matchBtn'){ mealDraft=document.getElementById('mealText').value; if(!mealDraft.trim()){ document.getElementById('mealText').focus(); toast('Type or speak what you ate first',true); return; } parsed=parseMeal(mealDraft); logStep='review'; renderLog(); window.scrollTo({top:0}); }
   else if(t.dataset.pplus){ const it=parsed.items[+t.dataset.pplus]; it.mult=+(it.mult+ (servingBase(it.food).grams?0.5:1/servingBase(it.food).n)).toFixed(2); renderParsed(); }
   else if(t.dataset.pminus){ const it=parsed.items[+t.dataset.pminus]; const step=servingBase(it.food).grams?0.5:1/servingBase(it.food).n; it.mult=Math.max(step/2,+(it.mult-step).toFixed(2)); renderParsed(); }
   else if(t.dataset.prm){ parsed.items.splice(+t.dataset.prm,1); renderParsed(); }
@@ -1800,10 +1850,10 @@ document.getElementById('logBody').addEventListener('click',async e=>{
   else if(t.dataset.fixest!=null && parsed){ parsed.fix=+t.dataset.fixest; renderParsed(); }
   else if(t.dataset.est && parsed && parsed.fix!=null && parsed.items[parsed.fix]){ const it=parsed.items[parsed.fix]; const f=makeMyFood(it.food.aliases[0],t.dataset.est); it.food=f; it.smart=false; it.mult=1; parsed.fix=null; renderParsed(); toast(`Saved “${f.name}” for next time`,true); }
   else if(t.dataset.est && parsed && parsed.left.length){ const name=parsed.left.shift(); const f=makeMyFood(name,t.dataset.est); parsed.items.push({food:f,mult:1}); renderParsed(); toast(`Saved “${f.name}” for next time`,true); }
-  else if(t.id==='addParsed'){ logDone=addParsed(); window.scrollTo({top:0}); renderLog(); }
+  else if(t.id==='addParsed'){ logDone=addParsed(); logStep='input'; window.scrollTo({top:0}); renderLog(); }
   else if(t.id==='moreFoods'){ listLimit=9999; renderFoodList(); }
   else if(t.dataset.lact==='dash'){ S.tab='today'; show('dash'); }
-  else if(t.dataset.lact==='again'){ logDone=null; logPortion=1; aiPreview=null; parsed=null; mealDraft=''; renderLog(); }
+  else if(t.dataset.lact==='again'){ logDone=null; logPortion=1; aiPreview=null; parsed=null; mealDraft=''; logStep='input'; renderLog(); }
   else if(t.dataset.lact==='home'){ show('home'); }
   else if(t.dataset.lact==='fav' && logDone){ const on=toggleFav(logDone); t.classList.toggle('on',on); t.textContent=on?'★ Favourite':'☆ Favourite'; }
   else if(t.dataset.qp){ logDone=addQuickPick(+t.dataset.qp); window.scrollTo({top:0}); renderLog(); }
@@ -2087,13 +2137,13 @@ function quickPicksHtml(){
   if(y.length){
     QP.push({type:'yday',meals:y});
     const tot=sum(y);
-    h+=`<button class="qp yday" data-qp="0"><small>Same as yesterday</small><b>${esc(y.map(mealText).join(', ').slice(0,60))}</b><span class="num">${fmt(tot.kcal)} kcal · ${fmt(tot.p)} g protein</span></button>`;
+    h+=`<button class="qpitem yday" data-qp="0"><span><small>Same as yesterday</small><b>${esc(y.map(mealText).join(', ').slice(0,60))}</b><em class="num">${fmt(tot.kcal)} kcal · ${fmt(tot.p)} g protein</em></span><span class="plus" aria-hidden="true">+</span></button>`;
   }
   const seen=new Set(y.map(m=>recKey(m)));
   const favs=RECENTS.filter(r=>r.fav), rec=RECENTS.filter(r=>!r.fav).sort((a,b)=>((b.slot===logSlot)-(a.slot===logSlot))||(b.last-a.last));
-  [...favs,...rec].forEach(r=>{ if(QP.length>=9||seen.has(r.k)) return; seen.add(r.k); QP.push({type:'rec',r});
-    h+=`<button class="qp ${r.fav?'fav':''}" data-qp="${QP.length-1}"><small>${r.fav?'★ Favourite':'Recent'}</small><b>${esc(r.name.slice(0,48))}</b><span class="num">${fmt(r.n.kcal)} kcal · ${fmt(r.n.p)} g protein</span></button>`; });
-  return h? `<div class="step"><span class="label">Quick picks · one tap to add</span><div class="qprow">${h}</div></div>` : '';
+  [...favs,...rec].forEach(r=>{ if(QP.length>=3||seen.has(r.k)) return; seen.add(r.k); QP.push({type:'rec',r});
+    h+=`<button class="qpitem" data-qp="${QP.length-1}"><span><small>${r.fav?'★ Favourite':'Recent'}</small><b>${esc(r.name.slice(0,48))}</b><em class="num">${fmt(r.n.kcal)} kcal · ${fmt(r.n.p)} g protein</em></span><span class="plus" aria-hidden="true">+</span></button>`; });
+  return h? `<div class="qpwrap"><span class="label">Or add again in one tap</span><div class="qplist">${h}</div></div>` : '';
 }
 function addQuickPick(i){
   const q=QP[i]; if(!q) return null;
@@ -2119,7 +2169,7 @@ function startVoice(){
   recog.onresult=e=>{
     const t=[...e.results].map(r=>r[0].transcript).join(' ').trim();
     ta.value=t; mealDraft=t;
-    if(e.results[e.results.length-1].isFinal && t){ parsed=parseMeal(t); renderParsed(); }
+    if(e.results[e.results.length-1].isFinal && t){ parsed=parseMeal(t); logStep='review'; renderLog(); window.scrollTo({top:0}); }
   };
   recog.onerror=ev=>{ toast(ev.error==='not-allowed'||ev.error==='service-not-allowed'?'Microphone is blocked. Allow it for this site in your browser settings.':ev.error==='no-speech'?"Didn't catch that. Tap the mic and try again.":"Voice input stopped. Try again.",true); };
   recog.onend=()=>{ recog=null; const b=document.getElementById('micBtn'); if(b){ b.classList.remove('listening'); b.setAttribute('aria-label','Speak your meal'); } const a=document.getElementById('mealText'); if(a) a.placeholder="Type it the way you'd say it, e.g. 2 roti, dal makhani aur thoda chawal"; };
