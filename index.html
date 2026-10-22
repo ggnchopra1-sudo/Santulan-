@@ -275,6 +275,62 @@ footer{font-size:12px;color:var(--muted);margin-top:26px;border-top:1px solid va
 .ptotal{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted)}
 .ptotal b{color:var(--ink)}
 .pleft{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* intro */
+.intro{padding-block:16px 120px;display:grid;gap:12px}
+.intro section{margin:0}
+.intro-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.intro-tag{font-size:12px;font-weight:600;color:var(--muted);background:var(--card);padding:6px 12px;border-radius:99px;box-shadow:var(--shadow)}
+.bento{border-radius:26px;padding:20px;position:relative;overflow:hidden}
+.hero-card{background:#F6F7EE;color:#0E2A1E}
+.hero-line{font-family:var(--f-display);font-weight:600;font-size:clamp(34px,10vw,48px);line-height:1.2;letter-spacing:-.045em;margin:0;text-wrap:initial}
+.hero-card p{margin:14px 0 0;font-size:15px;color:#3F5146;max-width:38ch}
+.pill{display:inline-block;border-radius:99px;padding:0 .32em .06em;line-height:1.08;letter-spacing:-.035em}
+.pill.lime{background:#C8F250;color:#0E2A1E}
+.pill.forest{background:#0E3B2A;color:#C8F250}
+.pill.outline{border:2.5px solid #0E3B2A;color:#0E3B2A;padding:0 .28em .02em}
+.pill.sm{font-family:var(--f-body);font-size:13px;font-weight:700;padding:5px 11px;letter-spacing:0;line-height:1.2}
+.pill.outline.sm{border-width:1.5px;padding:4px 10px}
+.bento-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.swirl{background:#C8F250;min-height:170px;padding:0}
+.swirl svg{position:absolute;inset:-12% -14%;width:128%;height:124%}
+.swirl .draw{stroke-dasharray:760;stroke-dashoffset:0;animation:drawS 1.6s cubic-bezier(.6,.05,.3,1) .2s both}
+@keyframes drawS{from{stroke-dashoffset:760}to{stroke-dashoffset:0}}
+.stats{background:#0E3B2A;color:#F4F7EC;display:grid;align-content:center;gap:10px}
+.stats div{display:flex;align-items:baseline;gap:8px}
+.stats b{font-family:var(--f-display);font-weight:700;font-size:26px;color:#C8F250;letter-spacing:-.04em;min-width:2.6em}
+.stats span{font-size:13px;opacity:.85}
+.demo{background:var(--card);box-shadow:var(--shadow)}
+.demo .label{display:block;margin-bottom:8px}
+.bubble{background:var(--ivory-2);border-radius:18px 18px 18px 6px;padding:12px 14px;font-weight:600;font-size:15px}
+.demo-arrow{font-size:18px;color:var(--muted);margin:6px 0 6px 14px}
+.demo-out{display:flex;flex-wrap:wrap;gap:6px}
+.demo .pill.outline{border-color:var(--olive);color:var(--olive)}
+.demo-next{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.demo-next b{color:var(--ink)}
+.who{background:#0E3B2A;color:#F4F7EC}
+.who .label{color:#C8F250;opacity:.9;display:block;margin-bottom:10px}
+.chips-fun{display:flex;flex-wrap:wrap;gap:8px}
+.chips-fun span{border:1.5px solid rgba(200,242,80,.55);color:#F4F7EC;border-radius:99px;padding:6px 12px;font-size:13.5px;font-weight:600}
+.chips-fun span:nth-child(3n+1){background:#C8F250;border-color:#C8F250;color:#0E2A1E}
+.how{background:#C8F250;color:#0E2A1E;border-radius:26px;padding:20px}
+.how h3{font-size:20px;font-weight:600;margin:0 0 12px;letter-spacing:-.03em}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.how-card{display:flex;flex-direction:column;gap:6px;min-width:0}
+.how-card svg{width:46px;height:46px;fill:none;stroke:#0E3B2A;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;margin-bottom:2px}
+.how-card b{font-family:var(--f-display);font-weight:600;font-size:14.5px;line-height:1.2;letter-spacing:-.02em}
+.how-card span{font-size:12.5px;line-height:1.35;opacity:.78}
+@media (max-width:420px){.how-grid{grid-template-columns:1fr}.how-card{display:grid;grid-template-columns:46px 1fr;column-gap:12px;row-gap:2px}.how-card svg{grid-row:span 2}}
+.intro-cta{position:fixed;left:0;right:0;bottom:0;z-index:8;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(to top,var(--ivory) 70%,transparent);text-align:center}
+.getstarted{width:100%;max-width:640px;border:0;border-radius:99px;background:#C8F250;color:#0E2A1E;font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:-.02em;padding:8px 8px 8px 26px;display:flex;justify-content:space-between;align-items:center;margin:0 auto;box-shadow:0 14px 30px -12px rgba(14,59,42,.55)}
+.getstarted .arr{width:48px;height:48px;border-radius:50%;background:#0E3B2A;color:#C8F250;display:grid;place-items:center;font-size:22px;transition:transform .2s}
+.getstarted:active .arr{transform:translateX(4px)}
+.intro-cta p{margin:8px 0 0;font-size:12px;color:var(--muted)}
+.intro>*:not(.intro-cta){animation:rise .5s ease both}
+.intro>*:nth-child(2){animation-delay:.05s}.intro>*:nth-child(3){animation-delay:.12s}.intro>*:nth-child(4){animation-delay:.19s}.intro>*:nth-child(5){animation-delay:.26s}.intro>*:nth-child(6){animation-delay:.33s}
+@keyframes rise{from{transform:translateY(10px)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.intro>*,.swirl .draw{animation:none!important}}
+
 /* loading + onboarding */
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding-block:30vh 0;font-family:var(--f-display);font-weight:700;font-size:22px;color:var(--olive);letter-spacing:-.03em}
 .loading .mark{width:56px;height:56px}
@@ -324,6 +380,71 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 
   <!-- LOADING -->
   <div id="scrLoad" class="loading"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="#0E3B2A"/><path d="M44.5 20.5C40 13 23 13 21.5 22.5C20 31.5 43.5 30 44.5 41.5C45.5 52.5 27 56 19.5 47.5C16 43 20.5 38.5 24.5 42" fill="none" stroke="#C8F250" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>santulan</span></div>
+
+  <!-- INTRO -->
+  <div id="scrIntro" class="intro" hidden>
+    <div class="intro-top">
+      <div class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="#0E3B2A"/><path d="M44.5 20.5C40 13 23 13 21.5 22.5C20 31.5 43.5 30 44.5 41.5C45.5 52.5 27 56 19.5 47.5C16 43 20.5 38.5 24.5 42" fill="none" stroke="#C8F250" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>santulan</h1></div>
+      <span class="intro-tag">santulan = balance</span>
+    </div>
+
+    <section class="bento hero-card">
+      <h2 class="hero-line">Eat <span class="pill lime">balanced</span><br>feel <span class="pill forest">energetic</span><br>the <span class="pill outline">desi</span> way</h2>
+      <p>Santulan turns your everyday roti, dal and chai into a clear picture of what your body got, and what it still needs.</p>
+    </section>
+
+    <div class="bento-row">
+      <section class="bento swirl" aria-hidden="true">
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"><path class="draw" d="M150 40C128 0 50 4 46 52C42 100 156 92 160 140C164 196 72 214 38 170C24 150 44 128 62 146" fill="none" stroke="#0E3B2A" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </section>
+      <section class="bento stats">
+        <div><b>225</b><span>desi dishes</span></div>
+        <div><b>0</b><span>sign-ups</span></div>
+        <div><b>100%</b><span>works offline</span></div>
+      </section>
+    </div>
+
+    <section class="bento demo">
+      <span class="label">Try saying</span>
+      <div class="bubble">“2 roti, dal makhani aur thoda chawal”</div>
+      <div class="demo-arrow" aria-hidden="true">↓</div>
+      <div class="demo-out"><span class="pill lime sm">738 kcal</span><span class="pill forest sm">24 g protein</span><span class="pill outline sm">iron ✓</span><span class="pill outline sm">16 g fibre</span></div>
+      <p class="demo-next"><b>Next:</b> paneer tikka in the evening to close your protein gap.</p>
+    </section>
+
+    <section class="bento who">
+      <span class="label">Made for you if</span>
+      <div class="chips-fun">
+        <span>you skip breakfast</span><span>chai is your fuel</span><span>you're tired by 4 pm</span><span>you eat ghar ka khana</span><span>you go veg on some days</span><span>you hate counting calories</span>
+      </div>
+    </section>
+
+    <section class="how">
+      <h3>How it makes life easy</h3>
+      <div class="how-grid">
+        <div class="how-card">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12c0-3 2-5 5-5h22c3 0 5 2 5 5v14c0 3-2 5-5 5H22l-9 8v-8h0c-3 0-5-2-5-5z"/><path d="M16 17h16M16 23h10"/></svg>
+          <b>Type it like you say it</b>
+          <span>No weighing, no searching menus. Hinglish works.</span>
+        </div>
+        <div class="how-card">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16"/><path d="M24 8a16 16 0 0 1 15 21"/><circle cx="24" cy="24" r="7"/></svg>
+          <b>See what it gave you</b>
+          <span>Protein, iron, B12 and fibre for every meal.</span>
+        </div>
+        <div class="how-card">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 30c0 6 7 10 16 10s16-4 16-10z"/><path d="M6 30h36"/><path d="M18 22c0-4 3-4 3-8M26 22c0-4 3-4 3-8"/></svg>
+          <b>Know what to eat next</b>
+          <span>Skipped breakfast? It plans the rest of your day.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="intro-cta">
+      <button class="getstarted" id="getStarted"><span>Get Started</span><span class="arr" aria-hidden="true">→</span></button>
+      <p>Free · No sign-up · Your data stays on your phone</p>
+    </div>
+  </div>
 
   <!-- ONBOARDING -->
   <div id="scrOnb" hidden>
@@ -617,7 +738,7 @@ function addOns(){
 }
 
 /* ---------- screens ---------- */
-const scr={load:document.getElementById('scrLoad'),onb:document.getElementById('scrOnb'),home:document.getElementById('scrHome'),dash:document.getElementById('scrDash'),log:document.getElementById('scrLog')};
+const scr={load:document.getElementById('scrLoad'),intro:document.getElementById('scrIntro'),onb:document.getElementById('scrOnb'),home:document.getElementById('scrHome'),dash:document.getElementById('scrDash'),log:document.getElementById('scrLog')};
 function show(name){
   S.screen=name; for(const k in scr) scr[k].hidden = k!==name;
   window.scrollTo({top:0});
@@ -992,11 +1113,11 @@ setInterval(()=>{ if(S.screen==='home') renderHome(); else if(S.screen==='dash' 
 
 /* ---------- onboarding ---------- */
 function onbList(){ return QUESTIONS.filter(q=>!q.showIf || q.showIf(onbAns)); }
-function startOnb(prefill){ onbAns=Object.assign({},prefill||{}); if(!onbAns.name && S.name) onbAns.name=S.name; onbIdx=-1; show('onb'); }
+function startOnb(prefill){ onbAns=Object.assign({},prefill||{}); if(!onbAns.name && S.name) onbAns.name=S.name; onbIdx=0; show('onb'); }
 function renderOnb(){
   const list=onbList(), body=document.getElementById('onbBody');
   const total=list.length, back=document.getElementById('onbBack');
-  back.disabled = onbIdx<0;
+  back.disabled = onbIdx<0 || (onbIdx===0 && !!S.profile);
   if(onbIdx<0){
     document.getElementById('onbProg').style.width='0%'; document.getElementById('onbStep').textContent='';
     body.innerHTML=`<div class="onb-hero"><span class="label" style="color:inherit;opacity:.7">Welcome to santulan</span><h2>Let's set this up for you.</h2>
@@ -1046,7 +1167,8 @@ document.getElementById('onbBody').addEventListener('click',async e=>{
   if(t.dataset.day){ const d=Number(t.dataset.day); const s=new Set(onbAns.vegDays||[]); s.has(d)?s.delete(d):s.add(d); onbAns.vegDays=[...s].sort(); renderOnb(); return; }
   if(t.id==='onbNext'){ if(q.type==='text') return onbNextFromText(); if(q.type==='days' && !onbAns.vegDays) onbAns.vegDays=[]; onbIdx++; renderOnb(); window.scrollTo({top:0}); }
 });
-document.getElementById('onbBack').onclick=()=>{ if(onbIdx>=0){ onbIdx--; renderOnb(); } };
+document.getElementById('onbBack').onclick=()=>{ if(onbIdx===0 && !S.profile){ show('intro'); return; } if(onbIdx>0){ onbIdx--; renderOnb(); } };
+document.getElementById('getStarted').onclick=()=>startOnb();
 document.getElementById('redoSetup').onclick=()=>startOnb(S.profile);
 document.getElementById('nextFocus').onclick=()=>{ focusIdx++; renderHome(); };
 
@@ -1101,7 +1223,7 @@ function applySettings(d){ if(!d) return; if(d.weight) S.weight=Number(d.weight)
     saveSettings();
   }
   if(store.kind!=='db') setSync('');
-  if(!S.profile){ startOnb(); }
+  if(!S.profile){ show('intro'); }
   else {
     const go=new URLSearchParams(location.search).get('go');
     if(go==='log') openLog(); else if(go==='dash'){ S.tab='today'; show('dash'); } else show('home');
