@@ -588,6 +588,9 @@ html,body{margin:0}
 img{max-width:100%}
 button,input,textarea{-webkit-tap-highlight-color:transparent}
 .linkbtn{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.install{background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);display:grid;gap:12px;border:2px solid var(--lime)}
+.install-how{font-size:13.5px;line-height:1.5;background:var(--ivory-2);border-radius:14px;padding:10px 12px}
+.install-how b{font-weight:700}
 </style>
 </head>
 <body>
@@ -700,6 +703,11 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
     <div>
       <h2 class="hello" id="hello">Good morning,<br><span>Gagan</span></h2>
       <p class="hello-sub" id="helloSub">Small, steady habits keep your energy even through the day.</p>
+    </div>
+    <div class="install" id="installCard" hidden>
+      <div class="rh-top"><span class="rh-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3"/></svg></span><span><b>Add Santulan to your home screen</b><small id="installSub">Opens like an app, works offline</small></span></div>
+      <div id="installHow" class="install-how" hidden></div>
+      <div class="rh-btns"><button class="btn primary" id="installBtn">Install</button><button class="btn" id="installLater">Not now</button></div>
     </div>
     <div class="streak" id="streakCard" aria-live="polite"></div>
     <div id="waterHome"></div>
@@ -1172,6 +1180,35 @@ async function openHomeReport(kind){
 }
 document.getElementById('homeDay').onclick=()=>openHomeReport('day');
 document.getElementById('homeWeek').onclick=()=>openHomeReport('week');
+
+
+/* ---------- install to home screen ---------- */
+let installEvt=null;
+const isStandaloneApp=()=>{ try{ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true; }catch(e){ return false; } };
+function installHowText(){
+  const ua=navigator.userAgent;
+  if(/FBAN|FBAV|Instagram|Line\/|WhatsApp|wv\)/.test(ua)) return 'This page is open inside another app. Tap the <b>⋮</b> or <b>…</b> menu and choose <b>Open in Chrome</b> (or your browser), then add it from there.';
+  if(/iPhone|iPad|iPod/.test(ua)) return 'Tap the <b>Share</b> button <b>⬆</b> at the bottom of Safari, scroll down and tap <b>Add to Home Screen</b>.';
+  if(/SamsungBrowser/.test(ua)) return 'Tap the <b>≡</b> menu at the bottom, then <b>Add page to</b> → <b>Home screen</b>.';
+  if(/Android/.test(ua)) return 'In Chrome, tap <b>⋮</b> at the top right and <b>scroll the menu up</b> to the top: look for <b>Add to Home screen</b> or <b>Install app</b>. If it isn\'t there, tap <b>Share…</b> and choose <b>Add to Home screen</b>. Still missing? Update Chrome from the Play Store.';
+  return 'Use your browser menu and choose <b>Install</b> or <b>Add to Home screen</b>.';
+}
+function showInstallCard(manual){
+  const c=document.getElementById('installCard'); if(!c || isStandaloneApp() || lsGet('installLater')) return;
+  const how=document.getElementById('installHow'), btn=document.getElementById('installBtn');
+  if(manual){ how.innerHTML=installHowText(); how.hidden=true; btn.textContent='Show me how'; }
+  else { how.hidden=true; btn.textContent='Install'; }
+  c.hidden=false;
+}
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEvt=e; showInstallCard(false); });
+window.addEventListener('appinstalled',()=>{ installEvt=null; const c=document.getElementById('installCard'); if(c) c.hidden=true; toast('Santulan is on your home screen',true); });
+setTimeout(()=>{ if(!installEvt) showInstallCard(true); },3500);
+document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.id==='installBtn'){
+    if(installEvt){ installEvt.prompt(); try{ const r=await installEvt.userChoice; if(r.outcome==='accepted') document.getElementById('installCard').hidden=true; }catch(err){} installEvt=null; }
+    else { const how=document.getElementById('installHow'); how.hidden=!how.hidden; t.textContent=how.hidden?'Show me how':'Hide'; }
+  } else if(t.id==='installLater'){ lsSet('installLater',Date.now()); document.getElementById('installCard').hidden=true; }
+});
 
 /* ---------- startup splash ---------- */
 let splashDone=false;
