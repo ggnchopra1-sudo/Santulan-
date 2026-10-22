@@ -243,6 +243,20 @@ footer{font-size:12px;color:var(--muted);margin-top:26px;border-top:1px solid va
 .tile.dark{background:var(--card);color:var(--ink)}
 .tile.dark .ic{background:var(--lime);color:var(--lime-ink)}
 .nextlink{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:var(--card);border-radius:99px;padding:8px 8px 8px 18px;font-weight:600;box-shadow:var(--shadow)}
+.reports-home{background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);display:grid;gap:12px}
+.rh-top{display:flex;align-items:center;gap:12px}
+.rh-top span:last-child{display:flex;flex-direction:column}
+.rh-top b{font-weight:600}
+.rh-top small{font-size:12px;color:var(--muted)}
+.rh-ic{width:40px;height:40px;border-radius:12px;background:#0E3B2A;display:grid;place-items:center;flex:none}
+.rh-ic svg{width:22px;height:22px;fill:none;stroke:#C8F250;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rh-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rh-btns .btn{padding:10px;font-size:14px}
+.rep-card img{width:100%;aspect-ratio:1/1;border-radius:18px;display:block;margin:12px 0 4px;background:rgba(255,255,255,.06)}
+.rep-card .rep-load{aspect-ratio:1/1;border-radius:18px;margin:12px 0 4px;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:14px;opacity:.75}
+.rep-card .row{justify-content:center;margin-top:12px}
+.rep-card .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:#F4F7EC}
+.rep-card .btn.primary{background:#C8F250;border-color:#C8F250;color:#0E2A1E}
 .report-link span:first-child{display:flex;flex-direction:column;text-align:left;gap:1px}
 .report-link small{font-weight:500;font-size:12px;color:var(--muted)}
 .nextlink .arrow{width:36px;height:36px;border-radius:50%;background:var(--forest);color:var(--lime);display:grid;place-items:center}
@@ -687,7 +701,10 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
       <button class="tile dark" id="goDash"><span class="ic" aria-hidden="true">↗</span><span><b>Dashboard</b><small id="dashHint">Your day, plan and week</small></span></button>
     </div>
     <button class="nextlink" id="goNext"><span>What should I eat next?</span><span class="arrow" aria-hidden="true">→</span></button>
-    <button class="nextlink report-link" id="goReport"><span><b>Your weekly report card</b><small>Download or share your last 7 days</small></span><span class="arrow" aria-hidden="true">↓</span></button>
+    <div class="reports-home">
+      <div class="rh-top"><span class="rh-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 15v-3M12 15V8M16 15v-5"/></svg></span><span><b>Your report cards</b><small>Save or share as a square image</small></span></div>
+      <div class="rh-btns"><button class="btn primary" id="homeDay">Today</button><button class="btn" id="homeWeek">Last 7 days</button></div>
+    </div>
     <div class="focus" id="focusCard" hidden>
       <div class="row" style="justify-content:space-between"><span class="label">Your focus</span><button class="btn ghost" id="nextFocus" style="padding:4px 10px">Next tip</button></div>
       <p id="focusText"></p>
@@ -1093,6 +1110,28 @@ document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t
   if(t.id==='makeDayCard') makeDayCard();
   else if(t.id==='dlDay' && dayBlob) saveBlob(dayBlob,`santulan-day-${dayBlobKey}.png`);
   else if(t.id==='shareDay' && dayBlob) shareBlob(dayBlob,`santulan-day-${dayBlobKey}.png`,'My day on Santulan · getsantulan.in'); });
+
+
+/* ---------- report cards from Home ---------- */
+let homeRep={blob:null,name:''};
+async function openHomeReport(kind){
+  const o=document.getElementById('celOverlay');
+  const title=kind==='day'?'Today’s nutrition card':'Your last 7 days';
+  o.innerHTML=`<div class="cel-card rep-card"><span class="label" style="color:#C8F250">Report card</span><h2 style="margin:6px 0 0;font-size:26px">${title}</h2><div class="rep-load" id="repImg">Drawing your card…</div>
+    <div class="row"><button class="btn primary" id="repDl" disabled>Download</button><button class="btn" id="repShare" hidden>Share</button><button class="btn" id="repClose">Close</button></div></div>`;
+  o.hidden=false;
+  document.getElementById('repClose').onclick=()=>{ o.hidden=true; o.innerHTML=''; };
+  const k=todayKey();
+  const c= kind==='day' ? await drawDay(k) : await drawReport();
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  homeRep={blob,name:kind==='day'?`santulan-day-${k}.png`:`santulan-week-${k}.png`};
+  const box=document.getElementById('repImg'); if(!box) return;
+  box.outerHTML=`<img src="${c.toDataURL('image/png')}" alt="${title}">`;
+  const dl=document.getElementById('repDl'); dl.disabled=false; dl.onclick=()=>saveBlob(homeRep.blob,homeRep.name);
+  if(canShareFiles(blob)){ const sh=document.getElementById('repShare'); sh.hidden=false; sh.onclick=()=>shareBlob(homeRep.blob,homeRep.name,'My Santulan report · getsantulan.in'); }
+}
+document.getElementById('homeDay').onclick=()=>openHomeReport('day');
+document.getElementById('homeWeek').onclick=()=>openHomeReport('week');
 
 /* ---------- startup splash ---------- */
 let splashDone=false;
@@ -1511,7 +1550,7 @@ document.getElementById('nextFact').onclick=()=>{ factIdx=(factIdx+1)%FACTS.leng
 document.getElementById('goLog').onclick=()=>openLog();
 document.getElementById('goDash').onclick=async()=>{ S.tab='today'; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 let scrollToReport=false;
-document.getElementById('goReport').onclick=async()=>{ S.tab='week'; scrollToReport=true; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
+if(document.getElementById('goReport')) document.getElementById('goReport').onclick=async()=>{ S.tab='week'; scrollToReport=true; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 document.getElementById('goNext').onclick=async()=>{ S.tab='plan'; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));
 document.getElementById('logBack').onclick=()=>show(logReturn);
