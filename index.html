@@ -1002,6 +1002,23 @@ function addOns(){
 const scr={load:document.getElementById('scrLoad'),intro:document.getElementById('scrIntro'),onb:document.getElementById('scrOnb'),home:document.getElementById('scrHome'),dash:document.getElementById('scrDash'),log:document.getElementById('scrLog')};
 
 
+
+/* meal names with quantities, e.g. "3 × Plain paratha, Shahi paneer" */
+function qtyName(name,label){
+  label=(label||'').trim(); if(!label||label==='as described') return name;
+  let m=label.match(/^(\d+(?:\.\d+)?)\s+(.*?)\s*×\s*(\d+(?:\.\d+)?)$/); if(m) label=`${+(m[1]*m[3]).toFixed(2)} ${m[2]}`;
+  m=label.match(/^(\d+(?:\.\d+)?)\s/); if(!m) return name;
+  const n=+m[1]; if(n===1) return name;
+  if(Number.isInteger(n) && !/\b(g|ml)\b/.test(label)) return `${n} × ${name}`;
+  return `${name} (${label})`;
+}
+function mealText(m){
+  if(Array.isArray(m.items)&&m.items.length) return m.items.map(i=>qtyName(i.name,i.label)).join(', ');
+  const names=(m.name||'').split(', '), labels=(m.portionLabel||'').split(' + ');
+  if(names.length===labels.length) return names.map((n,i)=>qtyName(n,labels[i])).join(', ');
+  return qtyName(m.name,m.portionLabel);
+}
+
 /* ---------- daily nutrition card ---------- */
 async function saveBlob(blob,name){
   if(window.claude && window.claude.use){
@@ -1056,7 +1073,7 @@ async function drawDay(k){
     const ms=d.meals.filter(m=>m.slot===s.k), sk=d.skipped.includes(s.k);
     x.fillStyle=LIME; x.font=`600 22px ${B}`; x.fillText(s.name.toUpperCase(),tx,ty+6);
     x.fillStyle=IVORY; x.globalAlpha=ms.length?1:.5; x.font=`400 26px ${B}`;
-    x.fillText(fitText(x, ms.length? ms.map(m=>m.name).join(', ') : sk?'Skipped':'Not logged', 450),tx,ty+40); x.globalAlpha=1; });
+    x.fillText(fitText(x, ms.length? ms.map(mealText).join(', ') : sk?'Skipped':'Not logged', 450),tx,ty+40); x.globalAlpha=1; });
   // footer
   x.fillStyle=IVORY; x.globalAlpha=.85; x.font=`600 28px ${B}`; x.fillText('getsantulan.in',72,1036); x.globalAlpha=1;
   x.fillStyle=LIME; x.font=`600 24px ${B}`; x.textAlign='right'; x.fillText('✦ Built with Super Intelligence',W-72,1036); x.textAlign='left';
@@ -1176,7 +1193,7 @@ function renderToday(){
         </div></div>
       ${sk? `<div class="empty">Skipped. The plan spreads what you missed over your next meals.</div>`
           : !ms.length ? `<div class="empty">${past?'Nothing logged. Add it, or mark it skipped.':'Not eaten yet. See “What next” for ideas.'}</div>`:''}
-      ${ms.map(m=>`<div class="meal"><div><div class="n">${esc(m.name)}</div><div class="m num">${esc(m.portionLabel||'')} · ${fmt(m.n.kcal)} kcal · ${fmt(m.n.p)} g protein · ${fmt(m.n.fib)} g fibre${m.custom?' · AI estimate':''}</div></div>
+      ${ms.map(m=>`<div class="meal"><div><div class="n">${esc(mealText(m))}</div><div class="m num">${esc(m.portionLabel||'')} · ${fmt(m.n.kcal)} kcal · ${fmt(m.n.p)} g protein · ${fmt(m.n.fib)} g fibre${m.custom?' · AI estimate':''}</div></div>
         <span><button class="favbtn ${isFav(m)?'on':''}" data-favmeal="${m.id}" aria-label="Favourite">${isFav(m)?'★':'☆'}</button><button class="x" data-del="${m.id}" aria-label="Remove ${esc(m.name)}">×</button></span><div class="chips">${mealChips(m.n)}</div></div>`).join('')}
     </div>`;
   }
@@ -1430,6 +1447,7 @@ function addParsed(){
   const first=parsed.items.find(it=>it.food);
   const m=addMeal({foodId:first?first.food.id:null, name:parsed.items.map(it=>it.custom?it.custom.name:it.food.name).join(', ').slice(0,80), n, slot:logSlot, portionLabel:label.slice(0,80), custom:parsed.items.some(it=>it.custom)});
   m.foodIds=parsed.items.filter(it=>it.food).map(it=>it.food.id);
+  m.items=parsed.items.map(it=>({name:it.custom?it.custom.name:it.food.name,label:it.custom?'as described':portionText(it.food,it.mult)}));
   saveDay(S.date);
   parsed=null; mealDraft=''; return m;
 }
@@ -1813,7 +1831,7 @@ function quickPicksHtml(){
   if(y.length){
     QP.push({type:'yday',meals:y});
     const tot=sum(y);
-    h+=`<button class="qp yday" data-qp="0"><small>Same as yesterday</small><b>${esc(y.map(m=>m.name).join(', ').slice(0,60))}</b><span class="num">${fmt(tot.kcal)} kcal · ${fmt(tot.p)} g protein</span></button>`;
+    h+=`<button class="qp yday" data-qp="0"><small>Same as yesterday</small><b>${esc(y.map(mealText).join(', ').slice(0,60))}</b><span class="num">${fmt(tot.kcal)} kcal · ${fmt(tot.p)} g protein</span></button>`;
   }
   const seen=new Set(y.map(m=>recKey(m)));
   const favs=RECENTS.filter(r=>r.fav), rec=RECENTS.filter(r=>!r.fav).sort((a,b)=>((b.slot===logSlot)-(a.slot===logSlot))||(b.last-a.last));
