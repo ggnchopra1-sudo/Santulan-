@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#F1F3EA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#08130D" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
+<script>(function(){ try{ if(new URLSearchParams(location.search).has('demo')||sessionStorage.getItem('santulan:demo')||/^(localhost|127\.)/.test(location.hostname)) return; }catch(e){} var s=document.createElement('script'); s.defer=true; s.src='https://cloud.umami.is/script.js'; s.dataset.websiteId='e993dcac-a814-401a-9f4d-a5dd3454b22b'; document.head.appendChild(s); })();</script>
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -1078,6 +1079,8 @@ function dateLabel(k){ return k===todayKey()?'Today': k===shiftKey(todayKey(),-1
 /* ---------- demo mode (?demo) : a separate, pre-filled sandbox for recordings ---------- */
 const DEMO=(()=>{ try{ const q=new URLSearchParams(location.search); if(q.has('demo')){ sessionStorage.setItem('santulan:demo',q.get('demo')||'Riya'); } return sessionStorage.getItem('santulan:demo'); }catch(e){ return null; } })();
 const LSP = DEMO ? 'thali-demo:' : 'thali:';
+/* anonymous usage counts only (never meal contents): Umami */
+function track(name,data){ if(DEMO) return; const go=(n)=>{ try{ if(window.umami && umami.track){ umami.track(name,data); } else if(n<10) setTimeout(()=>go(n+1),1500); }catch(e){} }; go(0); }
 function lsGet(k){ try{ const v=localStorage.getItem(LSP+k); return v?JSON.parse(v):null; }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(LSP+k,JSON.stringify(v)); }catch(e){} }
 function seedDemo(){
@@ -1331,7 +1334,7 @@ function showInstallCard(manual){
   c.hidden=false;
 }
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEvt=e; showInstallCard(false); });
-window.addEventListener('appinstalled',()=>{ installEvt=null; const c=document.getElementById('installCard'); if(c) c.hidden=true; toast('Santulan is on your home screen',true); });
+window.addEventListener('appinstalled',()=>{ track('app_installed'); installEvt=null; const c=document.getElementById('installCard'); if(c) c.hidden=true; toast('Santulan is on your home screen',true); });
 setTimeout(()=>{ if(!installEvt) showInstallCard(true); },3500);
 document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='installBtn'){
@@ -1374,7 +1377,7 @@ function sickGet(){ const v=lsGet('sick'); return v&&SICK_TYPES[v.type]?v:null; 
 function sickDays(){ const v=lsGet('sickdays'); return Array.isArray(v)?v:[]; }
 function isSickDay(k){ return sickDays().includes(k); }
 function sickMarkToday(){ if(!sickGet()) return; const d=sickDays(), t=todayKey(); if(!d.includes(t)){ d.push(t); lsSet('sickdays',d.slice(-120)); } }
-function sickSet(type){ lsSet('sick',{type,since:todayKey()}); sickMarkToday(); sickPicking=false; }
+function sickSet(type){ track('sick_mode_on',{type}); lsSet('sick',{type,since:todayKey()}); sickMarkToday(); sickPicking=false; }
 function sickClear(){ lsSet('sick',null); }
 function sickPicks(type){ return SICK_TYPES[type].picks.map(id=>FOODS.find(f=>f.id===id)).filter(f=>f&&dietOk(f)).slice(0,4); }
 function sickDayNum(s){ return Math.round((keyToDate(todayKey())-keyToDate(s.since))/864e5)+1; }
@@ -1437,7 +1440,7 @@ function joinWords(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' a
 async function maybeMorning(force){
   try{
     const t=todayKey();
-    if(!force && (lsGet('mornShown')===t || S.screen!=='home' || !S.profile || (typeof sickGet==='function' && sickGet()))) return;
+    if(!force && (lsGet('mornShown')===t || lsGet('setupDay')===t || S.screen!=='home' || !S.profile || (typeof sickGet==='function' && sickGet()))) return;
     const ov=document.getElementById('celOverlay'); if(ov && !ov.hidden){ setTimeout(()=>maybeMorning(force),2500); return; }
     const y=shiftKey(t,-1), d=await loadDay(y), T=targets(), e=sum(d.meals);
     lsSet('mornShown',t);
@@ -1994,7 +1997,7 @@ function renderFoodList(){
       <button class="btn pista" data-addfood="${f.id}">Add</button></div>`; }).join('') + (total>list.length?`<div style="padding:12px 0;text-align:center"><button class="btn" id="moreFoods">Show all ${total} dishes</button></div>`:'')
     : `<div class="empty" style="padding:14px 0">No match. Type it in the box above instead.</div>`;
 }
-function addMeal(o){ const t=todayKey(), was=IDX.days.includes(t), m=addMealRaw(o); recTouch(m); if(S.date===t && !was && IDX.days.includes(t)) queueCel({type:'streak'}); checkDayComplete(); return m; }
+function addMeal(o){ const t=todayKey(), was=IDX.days.includes(t), m=addMealRaw(o); track('meal_logged',{slot:o.slot}); recTouch(m); if(S.date===t && !was && IDX.days.includes(t)) queueCel({type:'streak'}); checkDayComplete(); return m; }
 function addMealRaw({foodId=null,name,n,slot,portionLabel,custom=false}){
   const m={id:Math.random().toString(36).slice(2,9), foodId, name, n, slot, portionLabel, custom, t:Date.now()};
   S.day.meals.push(m);
@@ -2146,7 +2149,7 @@ document.getElementById('onbBody').addEventListener('click',async e=>{
   if(t.id==='onbStart'){ onbIdx=0; renderOnb(); return; }
   if(t.id==='onbFinish'){
     S.profile=normalizeProfile(onbAns); S.name=S.profile.name; S.weight=Number(S.profile.weight)||68;
-    nm.value=S.name; wt.value=S.weight; await saveSettings(); show('home'); return;
+    nm.value=S.name; wt.value=S.weight; await saveSettings(); lsSet('setupDay',todayKey()); track('setup_complete',{goal:(S.profile&&S.profile.goal)||''}); show('home'); return;
   }
   if(t.dataset.opt){ onbAns[q.k]=t.dataset.opt; renderOnb(); setTimeout(()=>{ onbIdx++; renderOnb(); window.scrollTo({top:0}); },180); return; }
   if(t.dataset.multi){ const v=t.dataset.multi; let s2=new Set(onbAns[q.k]||[]); if(v==='unsure'){ s2=s2.has('unsure')?new Set():new Set(['unsure']); } else { s2.delete('unsure'); s2.has(v)?s2.delete(v):s2.add(v); } onbAns[q.k]=[...s2]; renderOnb(); return; }
@@ -2558,6 +2561,7 @@ function applySettings(d){ if(!d) return; if(d.weight) S.weight=Number(d.weight)
     if(go==='log') openLog(); else if(go==='dash'){ S.tab='today'; show('dash'); } else show('home');
     setTimeout(()=>{ const si=streakInfo(), y=shiftKey(todayKey(),-1); if(si.frozen.includes(y) && lsGet('freezeNote')!==y){ lsSet('freezeNote',y); toast(`❄ Streak freeze saved your ${si.count}-day streak`,true); } },1800);
     setTimeout(()=>maybeMorning(new URLSearchParams(location.search).has('morning')),2600);
+    track('app_open',{mode:isStandaloneApp()?'app':'browser'});
   }
 })();
 </script>
