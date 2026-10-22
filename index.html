@@ -676,6 +676,46 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 .wd.rest b{background:#DCEBF0}
 .wd.rest b::after{content:"♥";width:auto;height:auto;background:none;color:#3F7A8C;font-size:11px}
 .cel-card .wd.rest b{background:rgba(190,225,240,.25)}
+
+/* morning balance pop-up */
+#mornOverlay{position:fixed;inset:0;z-index:60;background:rgba(5,16,10,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:grid;place-items:end center;padding:16px max(12px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));animation:fadeIn .3s ease both;overflow-y:auto}
+#mornOverlay.out{animation:mnFadeOut .28s ease forwards}
+@keyframes mnFadeOut{to{opacity:0}}
+.mn-card{width:100%;max-width:420px;background:var(--ivory);color:var(--ink);border-radius:32px;padding:22px 20px 18px;position:relative;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.55);animation:mnUp .7s cubic-bezier(.2,.9,.25,1.12) both}
+@keyframes mnUp{from{transform:translateY(60px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+.mn-sky{position:absolute;right:-30px;top:-40px;width:170px;height:170px;pointer-events:none}
+.mn-sunball{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#F6FF9C,#C8F250 60%,#A9D33A);box-shadow:0 0 50px rgba(200,242,80,.6);animation:mnSun 1.1s cubic-bezier(.2,.9,.3,1.2) .15s both}
+@keyframes mnSun{from{transform:translateY(70px) scale(.6);opacity:0}to{transform:none;opacity:1}}
+.mn-ray{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:2px dashed rgba(200,242,80,.55);animation:mnSpin 18s linear infinite, mnFade .8s ease .6s both}
+.mn-ray.r2{width:190px;height:190px;margin:-95px 0 0 -95px;animation-duration:26s;animation-direction:reverse;opacity:.6}
+.mn-ray.r3{display:none}
+@keyframes mnSpin{to{transform:rotate(360deg)}}
+@keyframes mnFade{from{opacity:0}}
+.mn-hi{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);position:relative;animation:mnIn .5s ease .25s both}
+.mn-card h2{font-family:var(--f-display);font-size:27px;font-weight:600;letter-spacing:-.035em;line-height:1.12;margin:8px 0 6px;max-width:16ch;position:relative;animation:mnIn .55s ease .32s both}
+.mn-sub{margin:0;color:var(--muted);font-size:14.5px;position:relative;animation:mnIn .55s ease .4s both}
+@keyframes mnIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.mn-bars{display:grid;gap:9px;margin:18px 0 4px;background:var(--card);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
+.mn-bar{display:grid;grid-template-columns:78px 1fr 46px;gap:10px;align-items:center;font-size:13px;animation:mnIn .45s ease var(--d) both}
+.mn-l{font-weight:600}
+.mn-track{height:10px;border-radius:99px;background:var(--ivory-2);overflow:hidden}
+.mn-track i{display:block;height:100%;width:var(--w);border-radius:99px;background:var(--pista-2);transform-origin:left;animation:mnGrow .9s cubic-bezier(.2,.8,.2,1) calc(var(--d) + .1s) both}
+.mn-bar.low .mn-track i{background:var(--warn)}
+.mn-bar.low .mn-l{color:var(--warn)}
+@keyframes mnGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.mn-v{text-align:right;color:var(--muted);font-weight:600}
+.mn-label{display:block;margin:16px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mn-picks{display:grid;gap:8px}
+.mn-pick{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border-radius:18px;padding:11px 10px 11px 14px;box-shadow:var(--shadow);animation:mnPop .5s cubic-bezier(.3,1.5,.5,1) var(--d) both}
+@keyframes mnPop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.mn-pick b{display:block;font-weight:600;font-size:14.5px}
+.mn-pick small{font-size:12px;color:var(--muted)}
+.mn-add{width:38px;height:38px;border-radius:50%;border:0;background:var(--lime);color:var(--lime-ink);font-size:20px;flex:none}
+.mn-add.done{background:var(--forest);color:var(--lime);font-size:15px}
+.mn-sun{margin:12px 0 0;font-size:13px;color:var(--muted);animation:mnIn .5s ease 1.5s both}
+.mn-go{margin-top:16px;animation:mnIn .5s ease 1.4s both}
+.mn-foot{text-align:center;font-size:12px;color:var(--muted);margin:10px 0 0}
+@media (prefers-reduced-motion:reduce){#mornOverlay,.mn-card,.mn-card *{animation:none!important}}
 </style>
 </head>
 <body>
@@ -851,6 +891,7 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
   </div>
 </div>
 <div class="cel-overlay" id="celOverlay" hidden role="dialog" aria-modal="true" aria-label="Celebration"></div>
+<div id="mornOverlay" hidden role="dialog" aria-modal="true" aria-label="Your daily balance"></div>
 <div class="toast" id="toast" hidden></div>
 <div id="demoBadge" hidden style="position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:9;font:600 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;background:#0E3B2A;color:#C8F250;padding:6px 10px;border-radius:99px;opacity:.85">Demo</div>
 
@@ -1378,6 +1419,64 @@ document.addEventListener('click',e=>{ const t=e.target.closest('button,summary'
   else if(t.id==='sickChange'){ sickClear(); sickPicking=true; rerender(); }
   else if(t.id==='sickBetter'){ sickClear(); sickPicking=false; toast('Glad you are feeling better',true); rerender(); }
   else if(t.dataset.sickadd){ const slot=isToday()?currentSlot():'l'; const f=addFood(t.dataset.sickadd, slot); if(f) toast(`Added ${f.name}`); rerender(); }
+});
+
+
+/* ---------- morning balance pop-up: yesterday's gaps, today's fix ---------- */
+const MORN_NUT=[
+  {k:'p',  l:'Protein', u:'g',  dp:0, foods:['eggs2','paneerbhurjicurry','moongchilla','soya','sprouts','chickenrice']},
+  {k:'fib',l:'Fibre',   u:'g',  dp:0, foods:['sprouts','fruit','oats','rajma','dalroti','papaya']},
+  {k:'b12',l:'B12',     u:'mcg',dp:1, foods:['milk','eggs2','curd','fish','milkwhey','paneerraw']},
+  {k:'d',  l:'Vitamin D',u:'mcg',dp:1, foods:['eggs2','fish','milk']},
+  {k:'fe', l:'Iron',    u:'mg', dp:1, foods:['palakpaneer','rajma','chole','sprouts','dates','masoordal']},
+  {k:'ca', l:'Calcium', u:'mg', dp:0, foods:['milk','curd','paneerraw','chaas','almonds']},
+];
+let mornState=null;
+function mornGreeting(){ const h=new Date().getHours(); return h<12?'Good morning':h<17?'Good afternoon':'Good evening'; }
+function joinWords(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+async function maybeMorning(force){
+  try{
+    const t=todayKey();
+    if(!force && (lsGet('mornShown')===t || S.screen!=='home' || !S.profile || (typeof sickGet==='function' && sickGet()))) return;
+    const ov=document.getElementById('celOverlay'); if(ov && !ov.hidden){ setTimeout(()=>maybeMorning(force),2500); return; }
+    const y=shiftKey(t,-1), d=await loadDay(y), T=targets(), e=sum(d.meals);
+    lsSet('mornShown',t);
+    const rows=MORN_NUT.map(n=>({...n, v:e[n.k], t:T[n.k], pct:Math.min(1.2,e[n.k]/T[n.k])}));
+    const gaps=rows.filter(r=>r.pct<0.7).sort((a,b)=>a.pct-b.pct);
+    const picks=[], seen=new Set();
+    for(const g of gaps){ for(const id of g.foods){ const f=FOODS.find(x=>x.id===id); if(!f||seen.has(id)||!dietOk(f)) continue; seen.add(id); picks.push({f, gap:g}); break; } if(picks.length>=3) break; }
+    mornState={y, meals:d.meals.length, water:+d.water||0, rows, gaps, picks};
+    showMorning();
+  }catch(err){}
+}
+function showMorning(){
+  const m=mornState, o=document.getElementById('mornOverlay'); if(!m||!o) return;
+  const first=(S.name||'').trim().split(' ')[0];
+  const hasD=m.gaps.some(g=>g.k==='d');
+  let head, sub;
+  if(!m.meals){ head='A fresh start today'; sub="Nothing was logged yesterday. Log today's meals and Santulan will keep you balanced."; }
+  else if(!m.gaps.length){ head='Yesterday was well balanced'; sub='You covered all your key nutrients. Keep the same rhythm today.'; }
+  else { head=`Yesterday you were low on ${joinWords(m.gaps.slice(0,3).map(g=>g.l==='Vitamin D'?'vitamin D':g.l==='B12'?'B12':g.l.toLowerCase()))}`; sub="Here's an easy way to balance it today."; }
+  const bars = m.meals ? `<div class="mn-bars">${m.rows.map((r,i)=>`<div class="mn-bar ${r.pct<0.7?'low':''}" style="--d:${0.5+i*0.09}s"><span class="mn-l">${r.l}</span><span class="mn-track"><i style="--w:${Math.max(3,Math.min(100,r.pct*100))}%"></i></span><span class="mn-v num">${Math.round(Math.min(r.pct,9.99)*100)}%</span></div>`).join('')}</div>` : '';
+  const picks = m.picks.length ? `<span class="mn-label">Today, try</span><div class="mn-picks">${m.picks.map((p,i)=>`<div class="mn-pick" style="--d:${1.2+i*0.12}s"><div><b>${esc(p.f.name)}</b><small>${esc(p.f.serving)} · fills ${p.gap.k==='b12'?'B12':p.gap.l.toLowerCase().replace('vitamin d','vitamin D')}</small></div><button class="mn-add" data-mornadd="${p.f.id}" aria-label="Add ${esc(p.f.name)}">+</button></div>`).join('')}</div>` : '';
+  const sun = (hasD || !m.meals) ? `<p class="mn-sun">☀️ 15–20 minutes of midday sun is the easiest vitamin D.</p>` : '';
+  o.innerHTML=`<div class="mn-card" role="document">
+    <div class="mn-sky" aria-hidden="true"><span class="mn-sunball"></span><span class="mn-ray r1"></span><span class="mn-ray r2"></span><span class="mn-ray r3"></span></div>
+    <span class="mn-hi">${mornGreeting()}${first?`, ${esc(first)}`:''}</span>
+    <h2>${esc(head)}</h2><p class="mn-sub">${esc(sub)}</p>
+    ${bars}${picks}${sun}
+    <button class="getstarted mn-go" id="mornGo"><span>Let's balance today</span><span class="arr" aria-hidden="true">→</span></button>
+    <p class="mn-foot">Santulan means balance.</p>
+  </div>`;
+  o.hidden=false; haptic();
+}
+function closeMorning(){ const o=document.getElementById('mornOverlay'); if(!o) return; o.classList.add('out'); setTimeout(()=>{ o.hidden=true; o.classList.remove('out'); o.innerHTML=''; if(S.screen==='home') renderHome(); },280); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') setTimeout(()=>maybeMorning(),900); });
+document.addEventListener('click',e=>{
+  const o=document.getElementById('mornOverlay'); if(!o || o.hidden || !o.contains(e.target)) return;
+  const b=e.target.closest('button');
+  if(e.target===o || (b && b.id==='mornGo')){ closeMorning(); return; }
+  if(b && b.dataset.mornadd){ const slot=isToday()?currentSlot():'b'; const f=addFood(b.dataset.mornadd, slot); if(f){ b.textContent='✓'; b.disabled=true; b.classList.add('done'); toast(`Added ${f.name}`); } }
 });
 
 /* ---------- startup splash ---------- */
@@ -2458,6 +2557,7 @@ function applySettings(d){ if(!d) return; if(d.weight) S.weight=Number(d.weight)
     const go=new URLSearchParams(location.search).get('go');
     if(go==='log') openLog(); else if(go==='dash'){ S.tab='today'; show('dash'); } else show('home');
     setTimeout(()=>{ const si=streakInfo(), y=shiftKey(todayKey(),-1); if(si.frozen.includes(y) && lsGet('freezeNote')!==y){ lsSet('freezeNote',y); toast(`❄ Streak freeze saved your ${si.count}-day streak`,true); } },1800);
+    setTimeout(()=>maybeMorning(new URLSearchParams(location.search).has('morning')),2600);
   }
 })();
 </script>
