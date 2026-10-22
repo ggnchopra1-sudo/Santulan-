@@ -758,7 +758,13 @@ const QUESTIONS = [
   {k:'sex', q:'Are you a man or a woman?', hint:'Iron and calorie needs differ. Skip if you prefer.', opts:[['m','Man'],['f','Woman'],['na','Prefer not to say']]},
   {k:'weight', q:'Roughly what do you weigh?', hint:'Sets your daily protein and calorie targets. You can fine-tune it later.', opts:[['48','Under 50 kg'],['55','50–60 kg'],['68','60–75 kg'],['82','75–90 kg'],['95','Over 90 kg']]},
   {k:'goal', q:"What's your main goal right now?", opts:[['fat','Lose belly fat or weight'],['energy','More energy, less tiredness'],['labs','Improve lab numbers','Sugar, cholesterol and so on'],['prevent','Prevention','Diabetes or heart issues run in the family'],['muscle','Build strength and muscle']]},
-  {k:'energy', q:'When does low energy hit you most?', opts:[['morning','Right after waking up','Even after a full night\'s sleep'],['afternoon','Mid-afternoon, after lunch'],['allday','All day, more or less'],['evening','Evenings or after work'],['varies','It varies, no clear pattern']]},
+  {k:'energy', q:'When does low energy hit you most?', opts:[['morning','Right after waking up','Even after a full night\'s sleep'],['afternoon','Mid-afternoon, after lunch'],['allday','All day, more or less'],['evening','Evenings or after work'],['varies','It varies, no clear pattern']], showIf:p=>p.goal==='energy'},
+  {k:'fatBlock', q:'What gets in the way most?', hint:'Pick the one that sounds most like you.', showIf:p=>p.goal==='fat', opts:[['late','Late-night snacking'],['sweets','Sweets and mithai'],['fried','Fried snacks'],['portions','Big portions of roti or rice'],['outside','Eating out or ordering in']]},
+  {k:'fatPace', q:'How would you like to go about it?', showIf:p=>p.goal==='fat', opts:[['steady','Slow and steady','Small changes that last'],['focused','Focused','Ready for bigger changes']]},
+  {k:'labs', type:'multi', q:'Which numbers are you working on?', hint:'Pick all that apply. This stays private to you.', showIf:p=>p.goal==='labs', opts:[['sugar','Blood sugar (HbA1c)'],['chol','Cholesterol'],['bp','Blood pressure'],['thyroid','Thyroid'],['vit','Vitamin B12 or D'],['iron','Iron or haemoglobin'],['unsure','Not sure yet']]},
+  {k:'family', type:'multi', q:'What runs in your family?', hint:'Pick all that apply. This stays private to you.', showIf:p=>p.goal==='prevent', opts:[['diabetes','Diabetes'],['heart','Heart disease'],['bp','High blood pressure'],['thyroid','Thyroid'],['unsure','Not sure']]},
+  {k:'training', q:'How often do you strength train?', showIf:p=>p.goal==='muscle', opts:[['0','Not yet, starting now'],['1-2','1–2 times a week'],['3-4','3–4 times a week'],['5+','5 or more times a week']]},
+  {k:'whey', q:'Are you open to protein supplements?', showIf:p=>p.goal==='muscle', opts:[['yes','Yes, I already use whey'],['open','Open to it'],['no','I prefer food only']]},
   {k:'sleep', q:"How's your sleep usually?", opts:[['good','7+ hours, regular timings'],['irregular','7+ hours, but timings shift a lot'],['short','Under 6–7 hours most nights'],['restless','Enough hours, but I wake up unrested'],['chaotic','Very irregular, depends on work']]},
   {k:'eating', q:'What does a typical day of eating look like?', opts:[['homeveg','Mostly home-cooked veg','Roti, dal, sabzi, rice'],['homemix','Home-cooked, with eggs or chicken sometimes'],['outside','A lot of outside or ordered food'],['irregular','Irregular: I skip meals or eat at odd times']]},
   {k:'skips', q:'Which meal do you skip most often?', opts:[['b','Breakfast'],['l','Lunch'],['d','Dinner, or I eat it very late'],['random','Whichever one work pushes out'],['none',"I don't skip meals"]]},
@@ -772,6 +778,41 @@ const QUESTIONS = [
 // Gagan's answers from the original setup chat, used if the owner has no saved profile yet
 const OWNER_PROFILE={name:'Gagan',age:'26-35',sex:'na',weight:'68',goal:'energy',energy:'varies',sleep:'good',eating:'irregular',skips:'b',morning:'milkdrink',activity:'mixed',blood:'2y+',diet:'nonvegfew',vegDays:[2],water:'2-3'};
 
+function goalTips(p){
+  const g=[], labs=new Set(p.labs||[]), fam=new Set(p.family||[]);
+  if(p.goal==='fat'){
+    const m={late:"Close the kitchen by 9:30 pm. If you're hungry later, have chaas or a few roasted makhana.",
+      sweets:'Keep mithai for weekends. On other days, have fruit with curd when the craving hits.',
+      fried:'Swap one fried snack a day for roasted chana, makhana or sprouts chaat.',
+      portions:'Use a smaller thali, and start with sabzi and dal before the roti or rice.',
+      outside:'When ordering in, pick dal, tandoori or paneer tikka over fried or creamy gravies, and add a salad.'};
+    if(m[p.fatBlock]) g.push(m[p.fatBlock]);
+    g.push('Fill half your plate with sabzi or salad before adding roti or rice.');
+  }
+  if(p.goal==='labs'){
+    if(labs.has('sugar')) g.push('Pair every roti or rice with dal, curd or paneer, and walk 10 minutes after meals to soften sugar spikes.');
+    if(labs.has('chol')) g.push('Aim for more fibre every day from dal, oats, sabzi and fruit, and keep fried food to once a week.');
+    if(labs.has('bp')) g.push('Go easy on namak, achar, papad and packaged namkeen.');
+    if(labs.has('thyroid')) g.push('Keep meal times steady, and get your TSH checked as often as your doctor advises.');
+    if(labs.has('vit')) g.push('Have milk, curd or eggs daily for B12, and 15–20 minutes of midday sun for vitamin D.');
+    if(labs.has('iron')) g.push('Squeeze lemon on dal and sabzi, and keep chai an hour away from meals so you absorb more iron.');
+    if(!g.length) g.push('Swap maida and sugary snacks for whole grains, dal and fruit, and recheck your numbers in 3 months.');
+  }
+  if(p.goal==='prevent'){
+    if(fam.has('diabetes')) g.push('With diabetes in the family, walk after meals, cut sugary drinks, and check HbA1c once a year.');
+    if(fam.has('heart')) g.push('With heart disease in the family, favour dal, sabzi and nuts over fried and creamy food, and check your lipid profile yearly.');
+    if(fam.has('bp')) g.push('With high BP in the family, keep salt low and check your blood pressure every few months.');
+    if(fam.has('thyroid')) g.push('With thyroid issues in the family, a yearly TSH test is worth it.');
+    if(!g.length) g.push('Swap maida and sugary snacks for whole grains, dal and fruit, and keep your waist in check.');
+  }
+  if(p.goal==='muscle'){
+    if(p.training==='0') g.push('Start with 2 full-body strength sessions a week. Squats, push-ups and lunges are enough to begin.');
+    if(p.whey==='yes'||p.whey==='open') g.push('A scoop of whey in milk after training is an easy 30 g of protein.');
+    if(p.whey==='no') g.push('Paneer, eggs, dal and soya chunks can cover your protein without supplements.');
+    g.push('Get protein into every meal, not just dinner.');
+  }
+  return g;
+}
 function personalTips(p){
   if(!p) return [];
   const t=[];
@@ -784,20 +825,19 @@ function personalTips(p){
   if(p.sleep==='irregular'||p.sleep==='chaotic') t.push('Fix your wake-up time first, even on weekends. A steady wake-up steadies everything else.');
   if(p.water==='<1'||p.water==='unknown'||p.water==='1-2') t.push('Keep a 1-litre bottle on your desk and finish it twice before evening.');
   if(p.activity==='sitting'||p.activity==='none') t.push('Walk 10–15 minutes after lunch and dinner. It is the easiest blood-sugar win there is.');
-  if(p.eating==='outside') t.push('When ordering in, pick dal, tandoori or paneer tikka over fried or creamy gravies, and add a salad.');
+  if(p.eating==='outside' && p.fatBlock!=='outside') t.push('When ordering in, pick dal, tandoori or paneer tikka over fried or creamy gravies, and add a salad.');
   if(p.eating==='irregular'||p.skips==='random') t.push('Keep meal times within an hour of the same time each day, and carry roasted chana or nuts as backup.');
-  if(p.goal==='fat') t.push('Fill half your plate with sabzi or salad before adding roti or rice.');
-  if(p.goal==='muscle') t.push('Get protein into every meal and add strength training 3 times a week.');
-  if(p.goal==='labs'||p.goal==='prevent') t.push('Swap maida and sugary snacks for whole grains, dal and fruit, and keep your waist in check.');
+  if(false) t.push('Swap maida and sugary snacks for whole grains, dal and fruit, and keep your waist in check.');
   if(p.diet==='veg'||p.diet==='vegan') t.push('B12 is hard to get on a veg diet. Have milk or curd daily, and ask your doctor about a B12 check.');
-  if(!t.length) t.push('Keep your plate balanced: half sabzi, a quarter protein, a quarter roti or rice.');
-  return t;
+  const all=[...goalTips(p),...t];
+  if(!all.length) all.push('Keep your plate balanced: half sabzi, a quarter protein, a quarter roti or rice.');
+  return [...new Set(all)];
 }
 function profileText(p){
   if(!p) return 'an adult in North India';
   const map=(k,v)=>{ const q=QUESTIONS.find(x=>x.k===k); const o=q&&q.opts&&q.opts.find(x=>x[0]===v); return o?o[1].toLowerCase():''; };
   const who = p.sex==='m'?'man':p.sex==='f'?'woman':'person';
-  return `a North Indian ${who}, age ${p.age||'unknown'}, about ${S.weight} kg, ${map('activity',p.activity)}. Goal: ${map('goal',p.goal)}. Diet: ${map('diet',p.diet)}. Low energy: ${map('energy',p.energy)}. Sleep: ${map('sleep',p.sleep)}. Most-skipped meal: ${map('skips',p.skips)}. Morning: ${map('morning',p.morning)}`;
+  return `a North Indian ${who}, age ${p.age||'unknown'}, about ${S.weight} kg, ${map('activity',p.activity)}. Goal: ${map('goal',p.goal)}. Diet: ${map('diet',p.diet)}. Low energy: ${map('energy',p.energy)}. Sleep: ${map('sleep',p.sleep)}. Most-skipped meal: ${map('skips',p.skips)}. Morning: ${map('morning',p.morning)}${p.fatBlock?'. Biggest obstacle: '+map('fatBlock',p.fatBlock):''}${(p.labs||[]).length?'. Working on: '+p.labs.join(', '):''}${(p.family||[]).length?'. Family history: '+p.family.join(', '):''}${p.training?'. Strength training: '+map('training',p.training):''}${p.whey?'. Supplements: '+map('whey',p.whey):''}`;
 }
 const PORTIONS=[[0.5,'Half'],[1,'Regular'],[1.5,'1.5×'],[2,'Double']];
 const FACTS = [
@@ -842,7 +882,7 @@ function targets(){
   const p=S.profile||{}, w=S.weight||68;
   const factor={sitting:29,none:28,mixed:31,workout23:33,workout4:36}[p.activity]||31;
   let kcal=w*factor*(p.sex==='f'?0.92:1);
-  if(p.goal==='fat') kcal*=0.88; if(p.goal==='muscle') kcal*=1.05;
+  if(p.goal==='fat') kcal*=(p.fatPace==='focused'?0.85:0.9); if(p.goal==='muscle') kcal*=1.05;
   kcal=Math.max(1500,Math.round(kcal/10)*10);
   const prot = p.goal==='muscle'?1.6 : p.goal==='fat'?1.4 : 1.2;
   return { kcal, p:Math.round(w*prot), f:Math.round(kcal*0.28/9), c:Math.round(kcal*0.5/4), fib:p.sex==='f'?25:30, b12:2.4, d:15, fe:p.sex==='f'?29:19, ca:1000 };
@@ -900,8 +940,16 @@ function remainingSlots(){
 }
 function scoreFood(f, gaps, T, share, budget, eatenIds, slotK){
   let sc=0; const share2=Math.max(share,0.4);
-  for(const k in W){ const g=gaps[k]*share2; if(g>0) sc+=W[k]*Math.min(f[k],g)/T[k]; }
-  const over=Math.max(0,f.kcal-budget*1.3); sc-=over/T.kcal*5;
+  const pf=S.profile||{}, focus=new Set([...(pf.labs||[]),...(pf.family||[])]);
+  const wt={...W}; if(pf.goal==='muscle') wt.p=4.5;
+  if(pf.goal==='fat'||focus.has('sugar')||focus.has('diabetes')||focus.has('chol')||focus.has('heart')) wt.fib=2.5;
+  if(focus.has('vit')) { wt.b12=3; wt.d=2.5; } if(focus.has('iron')) wt.fe=2.4;
+  for(const k in wt){ const g=gaps[k]*share2; if(g>0) sc+=wt[k]*Math.min(f[k],g)/T[k]; }
+  const over=Math.max(0,f.kcal-budget*1.3); sc-=over/T.kcal*(pf.goal==='fat'?8:5);
+  if((focus.has('sugar')||focus.has('diabetes')||pf.fatBlock==='sweets') && (f.cat==='sweets'||(f.c>70&&f.fib<4))) sc-=0.6;
+  if((focus.has('chol')||focus.has('heart')||pf.fatBlock==='fried') && (f.cat==='street'||f.f>22)) sc-=0.5;
+  if(focus.has('bp') && ['achar','papad','namkeen','samosa'].includes(f.id)) sc-=0.8;
+  if(pf.whey==='no' && (f.id==='whey'||f.id==='milkwhey')) sc-=3;
   if((slotK==='l'||slotK==='d') && f.kcal<budget*0.45) sc-=0.25;
   if(eatenIds.has(f.id)) sc-=0.6;
   if(f.id==='samosa'||f.id==='chaibiscuit') sc-=0.5;
@@ -1425,6 +1473,10 @@ function renderOnb(){
   let h=`<h2 class="onb-q">${q.q}</h2>${q.hint?`<p class="onb-hint">${q.hint}</p>`:'<div style="height:14px"></div>'}`;
   if(q.type==='text'){
     h+=`<input class="onb-input" id="onbText" maxlength="24" placeholder="${q.ph||''}" value="${esc(onbAns[q.k]||'')}" autocomplete="given-name"><button class="onb-cta" id="onbNext">Continue</button>`;
+  } else if(q.type==='multi'){
+    const sel=new Set(onbAns[q.k]||[]);
+    h+=`<div class="opts">${q.opts.map(([v,l,sub])=>`<button class="opt" aria-pressed="${sel.has(v)}" data-multi="${v}"><span>${l}${sub?`<small>${sub}</small>`:''}</span><span class="tick" aria-hidden="true">${sel.has(v)?'✓':''}</span></button>`).join('')}</div>
+      <button class="onb-cta" id="onbNext">${sel.size?'Continue':'Skip'}</button>`;
   } else if(q.type==='days'){
     const sel=new Set(onbAns.vegDays||[]);
     h+=`<div class="daygrid">${DAYS.map((d,i)=>`<button class="opt" aria-pressed="${sel.has(i)}" data-day="${i}">${d}</button>`).join('')}</div>
@@ -1457,8 +1509,9 @@ document.getElementById('onbBody').addEventListener('click',async e=>{
     nm.value=S.name; wt.value=S.weight; await saveSettings(); show('home'); return;
   }
   if(t.dataset.opt){ onbAns[q.k]=t.dataset.opt; renderOnb(); setTimeout(()=>{ onbIdx++; renderOnb(); window.scrollTo({top:0}); },180); return; }
+  if(t.dataset.multi){ const v=t.dataset.multi; let s2=new Set(onbAns[q.k]||[]); if(v==='unsure'){ s2=s2.has('unsure')?new Set():new Set(['unsure']); } else { s2.delete('unsure'); s2.has(v)?s2.delete(v):s2.add(v); } onbAns[q.k]=[...s2]; renderOnb(); return; }
   if(t.dataset.day){ const d=Number(t.dataset.day); const s=new Set(onbAns.vegDays||[]); s.has(d)?s.delete(d):s.add(d); onbAns.vegDays=[...s].sort(); renderOnb(); return; }
-  if(t.id==='onbNext'){ if(q.type==='text') return onbNextFromText(); if(q.type==='days' && !onbAns.vegDays) onbAns.vegDays=[]; onbIdx++; renderOnb(); window.scrollTo({top:0}); }
+  if(t.id==='onbNext'){ if(q.type==='text') return onbNextFromText(); if(q.type==='days' && !onbAns.vegDays) onbAns.vegDays=[]; if(q.type==='multi' && !onbAns[q.k]) onbAns[q.k]=[]; onbIdx++; renderOnb(); window.scrollTo({top:0}); }
 });
 document.getElementById('onbBack').onclick=()=>{ if(onbIdx===0 && !S.profile){ show('intro'); return; } if(onbIdx>0){ onbIdx--; renderOnb(); } };
 document.getElementById('getStarted').onclick=()=>startOnb();
