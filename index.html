@@ -243,6 +243,8 @@ footer{font-size:12px;color:var(--muted);margin-top:26px;border-top:1px solid va
 .tile.dark{background:var(--card);color:var(--ink)}
 .tile.dark .ic{background:var(--lime);color:var(--lime-ink)}
 .nextlink{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:var(--card);border-radius:99px;padding:8px 8px 8px 18px;font-weight:600;box-shadow:var(--shadow)}
+.report-link span:first-child{display:flex;flex-direction:column;text-align:left;gap:1px}
+.report-link small{font-weight:500;font-size:12px;color:var(--muted)}
 .nextlink .arrow{width:36px;height:36px;border-radius:50%;background:var(--forest);color:var(--lime);display:grid;place-items:center}
 
 /* log screen */
@@ -626,6 +628,7 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
       <button class="tile dark" id="goDash"><span class="ic" aria-hidden="true">↗</span><span><b>Dashboard</b><small id="dashHint">Your day, plan and week</small></span></button>
     </div>
     <button class="nextlink" id="goNext"><span>What should I eat next?</span><span class="arrow" aria-hidden="true">→</span></button>
+    <button class="nextlink report-link" id="goReport"><span><b>Your weekly report card</b><small>Download or share your last 7 days</small></span><span class="arrow" aria-hidden="true">↓</span></button>
     <div class="focus" id="focusCard" hidden>
       <div class="row" style="justify-content:space-between"><span class="label">Your focus</span><button class="btn ghost" id="nextFocus" style="padding:4px 10px">Next tip</button></div>
       <p id="focusText"></p>
@@ -1235,6 +1238,8 @@ For each meal left, suggest 2 common, easily available North Indian options with
 document.getElementById('nextFact').onclick=()=>{ factIdx=(factIdx+1)%FACTS.length; renderHome(); };
 document.getElementById('goLog').onclick=()=>openLog();
 document.getElementById('goDash').onclick=async()=>{ S.tab='today'; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
+let scrollToReport=false;
+document.getElementById('goReport').onclick=async()=>{ S.tab='week'; scrollToReport=true; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 document.getElementById('goNext').onclick=async()=>{ S.tab='plan'; if(!isToday()){ S.date=todayKey(); S.day=await loadDay(S.date);} show('dash'); };
 document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));
 document.getElementById('logBack').onclick=()=>show(logReturn);
@@ -1681,6 +1686,7 @@ async function renderReportCard(){
   reportBlob=await new Promise(r=>c.toBlob(r,'image/png'));
   if(!document.getElementById('reportBox')) return;
   const canShare=(()=>{ try{ return !!(navigator.canShare && navigator.canShare({files:[new File([reportBlob],'s.png',{type:'image/png'})]})); }catch(e){ return false; } })();
+  if(scrollToReport){ scrollToReport=false; setTimeout(()=>document.querySelector('.report')?.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'start'}),60); }
   box.innerHTML=`<img src="${url}" alt="Weekly report card" class="report-img">
     <div class="row" style="margin-top:12px"><button class="btn primary" id="dlReport">Download</button>${canShare?'<button class="btn" id="shareReport">Share</button>':''}</div>`;
 }
