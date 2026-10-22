@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.getsantulan.twa",
+      "sha256_cert_fingerprints": [
+        "C1:82:5A:D1:08:9E:DC:C6:65:5E:DF:9E:BC:0A:A5:C6:46:55:D7:8B:BA:87:F8:37:B3:87:CA:F1:F6:26:1A:2B"
+      ]
+    }
+  }
+]
