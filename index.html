@@ -746,6 +746,7 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 </div>
 <div class="cel-overlay" id="celOverlay" hidden role="dialog" aria-modal="true" aria-label="Celebration"></div>
 <div class="toast" id="toast" hidden></div>
+<div id="demoBadge" hidden style="position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:9;font:600 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;background:#0E3B2A;color:#C8F250;padding:6px 10px;border-radius:99px;opacity:.85">Demo</div>
 
 <script>
 /* ---------- data ---------- */
@@ -923,8 +924,35 @@ function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 function dateLabel(k){ return k===todayKey()?'Today': k===shiftKey(todayKey(),-1)?'Yesterday': keyToDate(k).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'}); }
 
 /* ---------- storage ---------- */
-function lsGet(k){ try{ const v=localStorage.getItem('thali:'+k); return v?JSON.parse(v):null; }catch(e){ return null; } }
-function lsSet(k,v){ try{ localStorage.setItem('thali:'+k,JSON.stringify(v)); }catch(e){} }
+
+/* ---------- demo mode (?demo) : a separate, pre-filled sandbox for recordings ---------- */
+const DEMO=(()=>{ try{ const q=new URLSearchParams(location.search); if(q.has('demo')){ sessionStorage.setItem('santulan:demo',q.get('demo')||'Riya'); } return sessionStorage.getItem('santulan:demo'); }catch(e){ return null; } })();
+const LSP = DEMO ? 'thali-demo:' : 'thali:';
+function lsGet(k){ try{ const v=localStorage.getItem(LSP+k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(LSP+k,JSON.stringify(v)); }catch(e){} }
+function seedDemo(){
+  if(!DEMO || lsGet('settings')) return;
+  const name=DEMO.length>1&&DEMO.length<20?DEMO:'Riya';
+  lsSet('settings',{weight:62,name,profile:{name,age:'26-35',sex:'na',weight:'62',goal:'energy',energy:'afternoon',sleep:'irregular',eating:'irregular',skips:'b',morning:'chaisugar',activity:'mixed',blood:'2y+',diet:'nonvegfew',vegDays:[2],water:'1-2'}});
+  const F=id=>FOODS.find(f=>f.id===id);
+  const meal=(id,slot,mult=1,i=0)=>{ const f=F(id); return {id:'d'+Math.random().toString(36).slice(2,8)+i,foodId:id,name:f.name,slot,n:scaled(f,mult),portionLabel:mult===1?f.serving:`${f.serving} × ${mult}`,t:Date.now()}; };
+  const plans=[
+    [['poha','b'],['rajma','l'],['chana','s'],['chickenroti','d']],
+    [['eggs2','b'],['dalroti','l'],['fruit','s'],['palakpaneer','d']],
+    [['besan','b'],['kadhi','l'],['makhana','s'],['khichdi','d']],
+    [['paneerpar','b'],['chole','l'],['sprouts','s'],['fish','d']],
+    [['oats','b'],['dalchawal','l'],['nuts','s'],['tandoori','d']],
+    [['moongchilla','b'],['soya','l'],['chaas','s'],['eggcurry','d']],
+  ];
+  for(let i=6;i>=1;i--){
+    const k=shiftKey(todayKey(),-i), p=plans[(6-i)%plans.length];
+    const veg=keyToDate(k).getDay()===2;
+    const meals=p.map(([id,slot],j)=>{ const f=F(id); const useId=(veg&&f.diet!=='veg')?'paneerbhurji':id; return meal(useId,slot,1,j); });
+    lsSet('day-'+k,{meals,skipped:[],water:6+(i%3)});
+  }
+  lsSet('day-'+todayKey(),{meals:[meal('poha','b',1,1)],skipped:[],water:4});
+  try{ sessionStorage.setItem('santulan:splash','1'); }catch(e){}
+}
 async function loadDay(k){
   if(S.cache[k]) return S.cache[k];
   let d=null;
@@ -1669,7 +1697,7 @@ document.getElementById('nextFocus').onclick=()=>{ focusIdx++; renderHome(); };
 /* ---------- backup / restore (data lives in this browser) ---------- */
 document.getElementById('backupBtn').onclick=()=>{
   const out={app:'santulan',version:1,exported:new Date().toISOString(),data:{}};
-  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k.startsWith('thali:')) out.data[k]=localStorage.getItem(k); } }catch(e){}
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k.startsWith(LSP)) out.data[k.replace(LSP,'thali:')]=localStorage.getItem(k); } }catch(e){}
   const blob=new Blob([JSON.stringify(out)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`santulan-backup-${todayKey()}.json`; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('Backup downloaded');
@@ -1678,7 +1706,7 @@ document.getElementById('restoreFile').addEventListener('change',async e=>{
   const f=e.target.files[0]; if(!f) return;
   try{
     const j=JSON.parse(await f.text()); if(j.app!=='santulan'||!j.data) throw 0;
-    Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('thali:')) localStorage.setItem(k,v); });
+    Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('thali:')) localStorage.setItem(k.replace('thali:',LSP),v); });
     toast('Backup restored'); setTimeout(()=>location.reload(),700);
   }catch(err){ toast('That file is not a Santulan backup'); }
   e.target.value='';
@@ -2025,9 +2053,10 @@ document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t
 /* ---------- boot ---------- */
 function applySettings(d){ if(!d) return; if(d.weight) S.weight=Number(d.weight); if(d.name) S.name=d.name; if(d.profile) S.profile=d.profile; wt.value=S.weight; nm.value=S.name; }
 (async function boot(){
+  seedDemo(); if(DEMO && !new URLSearchParams(location.search).has('clean')) document.getElementById('demoBadge').hidden=false;
   applySettings(lsGet('settings'));
   let isOwner=false;
-  if(window.claude && window.claude.use){
+  if(window.claude && window.claude.use && !DEMO){
     claude.use('sample').then(s=>{ sample=s; if(s){ if(S.screen==='log' && !logDone) renderCustom(); else if(S.screen==='dash') render(); } });
     try{
       const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
