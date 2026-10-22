@@ -334,6 +334,11 @@ footer{font-size:12px;color:var(--muted);margin-top:26px;border-top:1px solid va
 @keyframes rise{from{transform:translateY(10px)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){.intro>*,.swirl .draw{animation:none!important}}
 
+.intro-foot{margin:6px 0 0;padding:18px 0 0;border-top:1px solid var(--line);text-align:center;display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.intro-foot p{margin:0}
+.intro-foot .made{font-family:var(--f-display);font-weight:600;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+.intro-foot b{color:var(--ink);font-weight:600}
+.intro-foot .copy{font-size:12px}
 .builtwith{justify-self:center;display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:8px 16px;border-radius:99px;background:var(--card);box-shadow:var(--shadow);font-family:var(--f-display);font-weight:600;font-size:13.5px;letter-spacing:-.01em;color:var(--ink)}
 .builtwith .spark{width:22px;height:22px;border-radius:50%;background:#0E3B2A;color:#C8F250;display:grid;place-items:center;font-size:12px}
 .builtwith.sm{margin-top:12px;font-size:12px;padding:6px 12px}
@@ -637,6 +642,12 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
     </section>
 
     <div class="builtwith"><span class="spark" aria-hidden="true">✦</span>Built with Super Intelligence</div>
+
+    <footer class="intro-foot">
+      <p class="made">Proudly Made in India <span aria-hidden="true">🇮🇳</span></p>
+      <p>Powered by <b>All Media &amp; Marketing</b></p>
+      <p class="copy">© 2026 Santulan. All rights reserved.</p>
+    </footer>
 
     <div class="intro-cta">
       <button class="getstarted" id="getStarted"><span>Get Started</span><span class="arr" aria-hidden="true">→</span></button>
