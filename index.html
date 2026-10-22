@@ -587,6 +587,7 @@ footer{font-size:12px;color:var(--muted);margin-top:26px;border-top:1px solid va
 html,body{margin:0}
 img{max-width:100%}
 button,input,textarea{-webkit-tap-highlight-color:transparent}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1429,6 +1430,130 @@ function makeMyFood(text,type){
   return registerMyFood(m);
 }
 
+
+/* ---------- Santulan smart estimator: works out unknown dishes offline ---------- */
+const NK=['kcal','p','c','f','fib','b12','d','fe','ca'];
+const SV=(kcal,p,c,f,fib=0,b12=0,d=0,fe=0,ca=0)=>({kcal,p,c,f,fib,b12,d,fe,ca});
+// [words, label, diet, serving, nutrition per serving, role]
+const SM_ING=[
+ [['chicken','murgh','murg','chiken','chikan','chkn','turkey'],'Chicken','nonveg','2 pieces',SV(250,38,0,10,0,0.5,0.2,1.5,20),'protein'],
+ [['mutton','lamb','goat','gosht','meat'],'Mutton','nonveg','1 bowl',SV(380,38,0,25,0,3.5,0.2,4,30),'protein'],
+ [['beef','pork','bacon','ham','sausage','sausages','salami','pepperoni'],'Meat','nonveg','1 serving',SV(330,26,2,24,0,2,0.5,2.5,20),'protein'],
+ [['fish','machli','machhi','rohu','salmon','tuna','pomfret','surmai','bangda','hilsa','basa','tilapia','mackerel','sardine','sardines','katla','singhara'],'Fish','nonveg','2 pieces',SV(220,34,0,8,0,2.5,6,1,40),'protein'],
+ [['prawn','prawns','shrimp','shrimps','jhinga','crab','lobster','squid','seafood','calamari'],'Prawns','nonveg','1 bowl',SV(140,28,1,2,0,1.5,0.1,0.6,90),'protein'],
+ [['egg','eggs','anda','ande','omelette','omelet','omlette'],'Egg','egg','2 eggs',SV(155,13,1,11,0,1.1,2.2,1.2,50),'protein'],
+ [['paneer','cottage'],'Paneer','veg','1 bowl',SV(290,18,4,22,0,0.8,0.2,0.3,400),'protein'],
+ [['tofu'],'Tofu','veg','1 bowl',SV(145,15,3,9,1,0,0,2.7,350),'protein'],
+ [['soya','soy','nutrela','chunks'],'Soya','veg','1 bowl',SV(140,21,13,0.5,5,0,0,8,140),'protein'],
+ [['rajma','kidney'],'Rajma','veg','1 katori',SV(210,13,36,1,11,0,0,3.5,60),'protein'],
+ [['chana','chole','chhole','chickpea','chickpeas','kabuli','hummus','falafel'],'Chana','veg','1 katori',SV(220,12,35,4,10,0,0,3.5,70),'protein'],
+ [['dal','daal','lentil','lentils','moong','masoor','toor','arhar','urad','lobia','sprouts'],'Dal','veg','1 katori',SV(180,11,28,3,8,0,0,2.8,40),'protein'],
+ [['rice','chawal','chaawal'],'Rice','veg','1 plate',SV(260,5,56,0.6,0.8,0,0,0.4,15),'carb'],
+ [['roti','chapati','chapatti','phulka','naan','kulcha','tortilla','pita','bhatura','puri','poori'],'Roti','veg','2 roti',SV(240,8,44,4,6,0,0,2.4,30),'carb'],
+ [['bread','toast','bun','pav','bagel','croissant','sourdough'],'Bread','veg','2 slices',SV(160,6,28,2,2.5,0,0,1.8,60),'carb'],
+ [['potato','potatoes','aloo','alu','fries','wedges','hashbrown'],'Potato','veg','1 bowl',SV(130,3,30,0.2,2.5,0,0,0.8,15),'carb'],
+ [['corn','makka','makki','bhutta','sweetcorn'],'Corn','veg','1 cup',SV(130,5,29,2,4,0,0,0.7,5),'carb'],
+ [['oats','oatmeal','muesli','granola','cornflakes','cereal','daliya','dalia','quinoa','millet','ragi','bajra','jowar','sabudana'],'Grains','veg','1 bowl',SV(200,6,36,4,4,0,0,2.5,30),'carb'],
+ [['mushroom','mushrooms','khumb'],'Mushroom','veg','1 bowl',SV(60,4,6,2,2,0,0.4,0.6,5),'veg'],
+ [['palak','spinach','saag','methi','greens','kale'],'Greens','veg','1 katori',SV(90,4,8,5,4,0,0,3,120),'veg'],
+ [['gobi','gobhi','cauliflower','broccoli','cabbage','bhindi','okra','baingan','brinjal','eggplant','lauki','tinda','karela','beans','peas','matar','capsicum','carrot','gajar','veg','vegetable','vegetables','veggie','veggies','sabzi','sabji','sabjee','mixed','zucchini','pumpkin','kaddu','tori','arbi','jackfruit','kathal'],'Vegetables','veg','1 katori',SV(110,3,12,6,4,0,0,1.2,40),'veg'],
+ [['milk','doodh'],'Milk','veg','1 glass',SV(150,8,12,8,0,1.1,0.1,0.1,300),'dairy'],
+ [['curd','dahi','yogurt','yoghurt','greek','raita','lassi','chaas','buttermilk'],'Curd','veg','1 katori',SV(100,6,8,5,0,0.5,0.1,0.1,200),'dairy'],
+ [['cheese','cheesy','mozzarella','cheddar','parmesan','feta'],'Cheese','veg','2 slices',SV(140,8,1,12,0,0.6,0.2,0.1,300),'dairy'],
+ [['banana','bananas','kela'],'Banana','veg','1 banana',SV(105,1.3,27,0.4,3,0,0,0.3,6),'fruit'],
+ [['apple','apples','seb','pear','nashpati'],'Apple','veg','1 apple',SV(95,0.5,25,0.3,4,0,0,0.2,11),'fruit'],
+ [['mango','aam','papaya','pineapple','orange','santra','mosambi','kinnow','grapes','angoor','watermelon','tarbooz','melon','muskmelon','kharbooja','guava','amrud','pomegranate','anar','chikoo','chiku','litchi','lychee','kiwi','berries','strawberry','strawberries','blueberries','fruit','fruits','plum','peach','cherry','cherries','jamun','avocado','dragonfruit'],'Fruit','veg','1 bowl',SV(90,1,22,0.4,3,0,0,0.4,20),'fruit'],
+ [['almond','almonds','badam','walnut','walnuts','akhrot','cashew','cashews','kaju','pista','pistachio','pistachios','peanut','peanuts','moongphali','mungfali','nuts','seeds','chia','flax','flaxseed','makhana','raisins','kishmish','dates','khajoor','anjeer','figs'],'Nuts','veg','1 handful',SV(170,5,7,14,3,0,0,1.2,40),'fat'],
+];
+// carb-carrying dishes: [words, label, serving, nutrition (veg version), methods already included]
+const SM_FMT=[
+ [['fried rice'],'Fried rice','1 plate',SV(480,10,70,16,3,0,0,1.6,40),['fried','pan']],
+ [['biryani','biriyani','briyani','pulao','pulav','khichdi','khichadi','tehri','risotto'],'Biryani','1 plate',SV(520,13,72,18,3,0.1,0,2,60),['curry']],
+ [['burger','burgers','sliders'],'Burger','1 burger',SV(430,14,46,20,3,0.3,0.2,3,110),[]],
+ [['pizza','pizzas'],'Pizza','2 slices',SV(520,20,60,21,3,0.6,0.2,3,260),[]],
+ [['sandwich','sandwiches','sub','panini','toastie','club'],'Sandwich','1 sandwich',SV(300,10,40,11,3,0.2,0.1,2,100),[]],
+ [['wrap','wraps','roll','rolls','frankie','kathi','shawarma','burrito','taco','tacos','quesadilla','kebab roll'],'Wrap','1 roll',SV(420,15,48,18,4,0.3,0.1,2.5,80),[]],
+ [['momo','momos','dumpling','dumplings','dimsum','gyoza','wonton','wontons','bao'],'Momos','6 momos',SV(300,10,45,8,2,0.1,0,1.8,30),['grilled']],
+ [['noodles','noodle','chowmein','chow mein','hakka','maggi','ramen','pasta','spaghetti','macaroni','penne','lasagna','lasagne','pad thai'],'Noodles','1 plate',SV(450,12,64,15,3,0.1,0,2.2,60),['pan']],
+ [['salad'],'Salad','1 bowl',SV(160,5,15,9,5,0,0,1.5,50),[]],
+ [['soup','shorba','broth','rasam','manchow'],'Soup','1 bowl',SV(120,5,14,4,2,0.1,0,1,30),['curry']],
+ [['shake','milkshake','smoothie','frappe','cold coffee'],'Shake','1 glass',SV(280,9,40,9,1,0.9,0.1,0.5,280),['sweet']],
+ [['thali','combo','platter','meal'],'Meal','1 plate',SV(650,20,85,22,9,0.3,0,4,150),['curry']],
+ [['dosa','uttapam','uthappam','appam','chilla','cheela','pancake','pancakes','waffle','waffles','crepe'],'Pancake','2 pieces',SV(300,8,44,10,3,0.2,0.2,1.5,60),['pan']],
+ [['paratha','parantha','stuffed'],'Paratha','2 parathas',SV(420,10,52,19,5,0,0,2.4,50),['pan']],
+];
+// how it's cooked: [words, kind, what it adds]
+const SM_MOD=[
+ [['fried','fry','deep fried','crispy','crunchy','crisp','batter','battered','fritter','fritters','pakora','pakoda','pakode','bhajji','bhaji','tempura','kfc','popcorn','nuggets','nugget','fingers','strips','wings','lollipop','65','amritsari','koliwada','cutlet','cutlets','tikki','patty'],'fried',SV(220,3,20,14,1,0,0,0.6,20)],
+ [['tandoori','grilled','grill','roast','roasted','baked','bbq','barbecue','tikka','seekh','kebab','kabab','kebabs','steamed','boiled','poached','air fried','airfried','smoked','peri peri','piri piri'],'grilled',SV(40,0,2,4,0,0,0,0.2,10)],
+ [['curry','masala','gravy','korma','kadai','kadhai','handi','bhuna','rogan','stew','jalfrezi','vindaloo','do pyaza','dopyaza','kofta','kolhapuri','chettinad','salan','tikka masala','rara','dhaba'],'curry',SV(130,2,9,10,2,0,0,0.8,40)],
+ [['butter','makhani','makhanwala','malai','creamy','cream','afghani','alfredo','white sauce','reshmi','lababdar','shahi','mughlai','pasanda'],'rich',SV(160,2,5,15,0,0.1,0.2,0.1,50)],
+ [['chilli','chili','manchurian','schezwan','szechuan','dragon','sweet and sour','teriyaki','kung pao','honey chilli','crispy chilli'],'indochinese',SV(170,2,20,9,1,0,0,0.6,15)],
+ [['stir fried','stir fry','sauteed','saute','bhurji','scrambled','tawa','pan','keema','sukka','sukha','dry'],'pan',SV(80,0,1,8,0,0,0,0.2,5)],
+ [['sweet','sugar','honey','syrup','caramel','chocolate','nutella','jam','glazed'],'sweet',SV(90,0,22,1,0,0,0,0.3,5)],
+];
+// no recognisable ingredient: guess the kind of food from the name
+const SM_CAT=[
+ ['sweet',['cake','pastry','brownie','cookie','cookies','donut','doughnut','muffin','cupcake','ice cream','icecream','gelato','sundae','kulfi','dessert','mithai','halwa','ladoo','laddu','laddoo','barfi','burfi','jalebi','gulab','jamun','rasgulla','rasmalai','kheer','payasam','custard','pudding','candy','toffee','chocolate','chikki','peda','sandesh','mousse','pie','tart','cheesecake','tiramisu','shrikhand','modak','imarti','malpua','sweets','mithai']],
+ ['drink',['juice','soda','cola','coke','pepsi','sprite','thums','limca','fanta','drink','tea','chai','coffee','latte','cappuccino','espresso','americano','mocha','mocktail','lemonade','nimbu','shikanji','jaljeera','sharbat','sherbet','kombucha','redbull','beer','wine','whisky','whiskey','vodka','rum','gin','cocktail','iced tea','hot chocolate','badam milk','haldi doodh','kadha']],
+ ['fried',['chips','nachos','samosa','samose','kachori','namkeen','bhujia','mathri','puff','puffs','vada','wada','bonda','pani puri','golgappa','golgappe','puchka','bhel','sev','chaat','papdi','dabeli','vada pav','pav bhaji','chole bhature','spring roll','french fries','fritos','kurkure','lays','pakoras']],
+ ['snack',['snack','snacks','bar','bars','crackers','khakhra','murmura','biscuit','biscuits','rusk','toast','popcorn','dhokla','khandvi','idli','fafda','poha','upma']],
+ ['light',['breakfast','brunch','tiffin']],
+ ['full',['lunch','dinner','buffet','feast','party','wedding','shaadi']],
+];
+function smNorm(t){ return ' '+String(t).toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim()+' '; }
+let SM_KNOWN=null;
+function smWordFuzzy(s,w){ if(w.length<5||w.includes(' ')) return false;
+  if(!SM_KNOWN){ SM_KNOWN=new Set(); [SM_ING,SM_FMT,SM_MOD].forEach(l=>l.forEach(e=>e[0].forEach(x=>SM_KNOWN.add(x)))); SM_CAT.forEach(([,ws])=>ws.forEach(x=>SM_KNOWN.add(x))); }
+  return s.trim().split(' ').some(x=>x.length>=4 && !SM_KNOWN.has(x) && x[0]===w[0] && lev(x,w)<=1); }
+function smFind(s,list,fuzzy){
+  const hits=[];
+  list.forEach(e=>{ let pos=-1; for(const w of e[0]){ const i=s.indexOf(' '+w+' '); if(i>=0 && (pos<0||i<pos)) pos=i; }
+    if(pos<0 && fuzzy && e[0].some(w=>smWordFuzzy(s,w))) pos=900; if(pos>=0) hits.push({e,pos}); });
+  return hits.sort((a,b)=>a.pos-b.pos).map(h=>h.e);
+}
+function smartEstimate(text){
+  const s=smNorm(text); if(s.trim().length<3) return null;
+  let ings=smFind(s,SM_ING,true); const fmts=smFind(s,SM_FMT,true), mods=smFind(s,SM_MOD,false);
+  const n=SV(0,0,0,0), add=(src,k=1)=>NK.forEach(x=>n[x]+=(src[x]||0)*k);
+  let serving='1 serving', conf='good', kind='', fmt=false;
+  const useMods=(skip,k)=>{ const seen=new Set(skip||[]); mods.forEach(m=>{ if(seen.has(m[1])) return; if(m[1]==='pan'&&seen.has('fried')) return; seen.add(m[1]); add(m[2],k); }); };
+  if(fmts.length){
+    const fm=fmts[0]; kind=fm[1]; add(fm[3]); serving=fm[2]; fmt=true;
+    if(fm[1]==='Biryani'||fm[1]==='Fried rice') ings=ings.filter(i=>i[1]!=='Rice');
+    if(fm[1]==='Noodles'||fm[1]==='Pancake'||fm[1]==='Paratha') ings=ings.filter(i=>i[5]!=='carb');
+    ings.filter(i=>i[5]==='protein').slice(0,2).forEach((i,j)=>add(i[4], j?0.25:0.45));
+    ings.filter(i=>i[5]!=='protein').slice(0,2).forEach(i=>add(i[4],0.3));
+    useMods(fm[4],0.6);
+  } else if(ings.length){
+    const main=ings.find(i=>i[5]==='protein')||ings[0]; kind=main[1];
+    add(main[4]); serving=main[3];
+    if(/^1 (bowl|katori)/.test(serving) && main[5]==='protein' && mods.some(m=>m[1]==='grilled'||m[1]==='fried')) serving='4 pieces';
+    ings.filter(i=>i!==main).slice(0,3).forEach(i=>add(i[4],0.5));
+    useMods([],1);
+  } else {
+    const cat=SM_CAT.find(([,ws])=>ws.some(w=>s.includes(' '+w+' ')||smWordFuzzy(s,w)));
+    if(cat){ add(EST_TYPES[cat[0]]); kind=EST_TYPES[cat[0]].label; }
+    else if(mods.length){ add(EST_TYPES.light); useMods([],0.6); kind='Dish'; }
+    else return null;
+    conf='rough';
+  }
+  const diet=ings.some(i=>i[2]==='nonveg')?'nonveg':ings.some(i=>i[2]==='egg')?'egg':'veg';
+  NK.forEach(k=>n[k]=+n[k].toFixed(k==='b12'||k==='d'?2:1));
+  return {n,serving,diet,conf,kind,fmt,prot:ings.filter(i=>i[5]==='protein').length,mods:mods.length};
+}
+function smTags(n){ const t=[]; if(n.p>=15)t.push('protein'); if(n.b12>=1)t.push('b12'); if(n.d>=2)t.push('d'); if(n.fe>=3.5)t.push('iron'); if(n.fib>=6)t.push('fibre'); return t; }
+function smartFood(txt){
+  const t=String(txt).replace(/\s+/g,' ').trim(); if(t.replace(/\s/g,'').length<3) return null;
+  const e=smartEstimate(t); if(!e) return null;
+  const alias=t.toLowerCase();
+  return Object.assign({id:'my_'+alias.replace(/[^a-z0-9]+/g,'_').slice(0,40), name:titleCase(alias), aliases:[alias], cat:'mine', slots:'blsd', diet:e.diet, dairy:false, plan:false, serving:e.serving, tags:smTags(e.n), estType:'smart', conf:e.conf}, e.n);
+}
+function persistSmart(f){
+  if(!f || f.estType!=='smart' || FOODS.some(x=>x.id===f.id)) return;
+  MYFOODS=MYFOODS.filter(x=>x.id!==f.id); MYFOODS.push(JSON.parse(JSON.stringify(f))); myFoodsSave(); registerMyFood(f);
+}
+
 /* ---------- typo-tolerant matching ---------- */
 function lev(a,b){
   if(Math.abs(a.length-b.length)>2) return 9;
@@ -1468,6 +1593,7 @@ function parseMeal(text){
     }
     const leftover=rest.replace(/\b(katori|katoris|bowl|bowls|plate|plates|glass|glasses|cup|cups|piece|pieces|pcs|slice|slices|ka|ki|ke|of|some|bhi|wala|wali|small|big|chhota|bada|mein|me|the|i|had|ate|khaya|khaye|liya|li|extra|spicy|hot|cold|warm|plain|homemade|home|made|ghar|fresh|tasty|light|heavy|more|full|just|only|today|aaj)\b/g,' ').replace(/\s+/g,' ').trim();
     let fuzzyFrom=null, lo=leftover;
+    if(found.length>=2 && hitAliases.some(a=>!a.includes(' ') && SM_ING.some(e=>e[5]==='protein'&&e[0].includes(a)))){ const whole0=chunk.replace(/^\s*(\d+(\.\d+)?|1\/2)\s*/,'').replace(new RegExp('^('+Object.keys(QTY_WORDS).join('|')+')\s+'),'').trim(); const e0=smartEstimate(whole0); if(e0 && (e0.fmt||e0.mods) && e0.prot){ const sf=smartFood(whole0); const b=servingBase(sf); items.push({food:sf,mult:Math.max(0.25,+((qty==null)?1:(b.grams?qty:qty/b.n)).toFixed(2)),smart:true}); continue; } }
     if(lo.replace(/\s/g,'').length>2){
       const whole=chunk.replace(/^\s*(\d+(\.\d+)?|1\/2)\s*/,'').replace(new RegExp('^('+Object.keys(QTY_WORDS).join('|')+')\\s+'),'').trim();
       const fz=fuzzyFind(whole) || (!found.length ? fuzzyFind(lo) : null);
@@ -1475,7 +1601,9 @@ function parseMeal(text){
       else if(found.length===1 && !hitAliases[0].includes(' ')){ found.length=0; lo=whole; }
     }
     found.forEach((f,i)=>{ const b=servingBase(f); const q=(i===0&&qty!=null)?qty:null; const mult = q==null?1 : (b.grams? q : q/b.n); items.push({food:f, mult:Math.max(0.25,+mult.toFixed(2)), fuzzy:fuzzyFrom}); });
-    if(lo.replace(/\s/g,'').length>2) left.push(found.length? lo : chunk.replace(/^\s*(\d+(\.\d+)?)\s*/,'').trim());
+    if(lo.replace(/\s/g,'').length>2){ const txt=found.length? lo : (lo.trim()||chunk.replace(/^\s*(\d+(\.\d+)?)\s*/,'').trim()); const sf=smartFood(txt);
+      if(sf){ const b=servingBase(sf); const mult=(qty==null||found.length)?1:(b.grams?qty:qty/b.n); items.push({food:sf,mult:Math.max(0.25,+mult.toFixed(2)),smart:true}); }
+      else left.push(found.length? lo : chunk.replace(/^\s*(\d+(\.\d+)?)\s*/,'').trim()); }
   }
   return {items,left};
 }
@@ -1487,12 +1615,15 @@ function renderParsed(){
   let h='<div class="preview">';
   if(items.length){
     h+=items.map((it,i)=>{ const src=it.custom||it.food; const k=(src.kcal||0)*(it.custom?1:it.mult), pr=(src.p||0)*(it.custom?1:it.mult);
-      return `<div class="pitem"><div><div class="n">${esc(it.custom?it.custom.name:it.food.name)}</div><div class="s num">${it.custom?'AI estimate':esc(portionText(it.food,it.mult))} · ${fmt(k)} kcal · ${fmt(pr)} g protein</div>${it.fuzzy?`<div class="fz">Matched from “${esc(it.fuzzy)}”</div>`:''}${it.food&&it.food.estType?`<div class="fz">Your food · rough estimate</div>`:''}</div>
+      return `<div class="pitem"><div><div class="n">${esc(it.custom?it.custom.name:it.food.name)}</div><div class="s num">${it.custom?'AI estimate':esc(portionText(it.food,it.mult))} · ${fmt(k)} kcal · ${fmt(pr)} g protein</div>${it.fuzzy?`<div class="fz">Matched from “${esc(it.fuzzy)}”</div>`:''}${it.smart?`<div class="fz">✦ Smart estimate${it.food.conf==='rough'?' · rough':''} · <button class="linkbtn" data-fixest="${i}">Not right?</button></div>`:it.food&&it.food.estType?`<div class="fz">Your food · saved estimate · <button class="linkbtn" data-fixest="${i}">Change</button></div>`:''}</div>
         <div class="stepper">${it.custom?'':`<button data-pminus="${i}" aria-label="Less">−</button><button data-pplus="${i}" aria-label="More">+</button>`}<button data-prm="${i}" aria-label="Remove">×</button></div></div>`; }).join('');
     const t=parsedTotals();
     h+=`<div class="ptotal num"><b>${fmt(t.kcal)} kcal</b> · ${fmt(t.p)} g protein · ${fmt(t.fib)} g fibre${t.b12>=0.8?' · B12':''}${t.fe>=3.5?' · iron':''}</div>`;
   }
-  if(left.length){
+  if(parsed.fix!=null && items[parsed.fix]){
+    const fi=items[parsed.fix];
+    h+=`<div class="est"><div class="pleft" style="margin:0">What kind of food is <b>“${esc(fi.food.name)}”</b>? I'll use this from now on.</div><div class="est-grid">${Object.entries(EST_TYPES).map(([k,t])=>`<button data-est="${k}">${t.label}</button>`).join('')}</div></div>`;
+  } else if(left.length){
     h+=`<div class="est"><div class="pleft" style="margin:0">I don't know <b>“${esc(left[0])}”</b> yet. What kind of food is it? I'll remember it next time.</div>
       <div class="est-grid">${Object.entries(EST_TYPES).map(([k,t])=>`<button data-est="${k}">${t.label}</button>`).join('')}</div>${left.length>1?`<div class="pleft">Also not recognised: ${left.slice(1).map(esc).join(', ')}</div>`:''}</div>`;
     if(sample) h+=`<button class="btn" id="estimateLeft" style="margin-top:8px">Estimate “${esc(left.join(', ')).slice(0,40)}” with AI</button>`;
@@ -1527,6 +1658,7 @@ function addParsed(){
   m.foodIds=parsed.items.filter(it=>it.food).map(it=>it.food.id);
   m.items=parsed.items.map(it=>({name:it.custom?it.custom.name:it.food.name,label:it.custom?'as described':portionText(it.food,it.mult)}));
   saveDay(S.date);
+  parsed.items.forEach(it=>{ if(it.smart) persistSmart(it.food); });
   parsed=null; mealDraft=''; return m;
 }
 function renderFoodList(){
@@ -1621,6 +1753,8 @@ document.getElementById('logBody').addEventListener('click',async e=>{
   else if(t.dataset.pminus){ const it=parsed.items[+t.dataset.pminus]; const step=servingBase(it.food).grams?0.5:1/servingBase(it.food).n; it.mult=Math.max(step/2,+(it.mult-step).toFixed(2)); renderParsed(); }
   else if(t.dataset.prm){ parsed.items.splice(+t.dataset.prm,1); renderParsed(); }
   else if(t.id==='estimateLeft'){ estimateLeft(); }
+  else if(t.dataset.fixest!=null && parsed){ parsed.fix=+t.dataset.fixest; renderParsed(); }
+  else if(t.dataset.est && parsed && parsed.fix!=null && parsed.items[parsed.fix]){ const it=parsed.items[parsed.fix]; const f=makeMyFood(it.food.aliases[0],t.dataset.est); it.food=f; it.smart=false; it.mult=1; parsed.fix=null; renderParsed(); toast(`Saved “${f.name}” for next time`,true); }
   else if(t.dataset.est && parsed && parsed.left.length){ const name=parsed.left.shift(); const f=makeMyFood(name,t.dataset.est); parsed.items.push({food:f,mult:1}); renderParsed(); toast(`Saved “${f.name}” for next time`,true); }
   else if(t.id==='addParsed'){ logDone=addParsed(); window.scrollTo({top:0}); renderLog(); }
   else if(t.id==='moreFoods'){ listLimit=9999; renderFoodList(); }
