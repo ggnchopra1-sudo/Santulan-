@@ -746,6 +746,8 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 .rec-steps li::before{content:counter(st);width:28px;height:28px;border-radius:50%;background:var(--lime);color:var(--lime-ink);display:grid;place-items:center;font-weight:700;font-size:13px}
 .rec-tip{margin:16px 0 0;background:var(--pista-soft);border-radius:16px;padding:12px 14px;font-size:14px}
 .cook{border:0;background:none;padding:0;margin-top:4px;font-size:12.5px;font-weight:700;color:var(--olive);text-decoration:underline;text-underline-offset:2px}
+.rec-meals{margin-top:6px}
+.rec-meals button{padding:9px 6px;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -1671,12 +1673,13 @@ const RECIPES=[
 ];
 function isVegPerson(){ const d=(S.profile&&S.profile.diet)||''; return d==='veg'||d==='vegan'; }
 function dietText(t){ if(!isVegPerson()) return t; return String(t).replace('even just 2 boiled eggs, curd or a glass of milk','even just curd, paneer or a glass of milk').replace('milk, curd or eggs','milk, curd or paneer').replace('Paneer, eggs, dal and soya chunks','Paneer, dal and soya chunks').replace('dal, curd, eggs or paneer','dal, curd or paneer').replace(' plus eggs or fish',''); }
+let recMeal=null;
 let recFilter='all', recOpen=null, recReturn='home', recDirect=false;
 function recDietOk(f){ const d=(S.profile&&S.profile.diet)||'nonvegfew'; if(d==='vegan') return f.diet==='veg'&&!f.dairy; if(d==='veg') return f.diet==='veg'; if(d==='egg') return f.diet!=='nonveg'; return true; }
 function recList(){ return RECIPES.map(r=>({...r,f:FOODS.find(x=>x.id===r.id)})).filter(r=>r.f && recDietOk(r.f)); }
 function recNutLine(f){ const p=[]; p.push(`${fmt(f.kcal)} kcal`, `${fmt(f.p)} g protein`); if(f.b12>=0.5) p.push(`${fmt(f.b12,1)} mcg B12`); if(f.d>=1) p.push(`${fmt(f.d,1)} mcg vitamin D`); if(f.fe>=2.5) p.push(`${fmt(f.fe,1)} mg iron`); return p.join(' · '); }
 function recChips(f){ return f.tags.filter(t=>t!=='sugary').map(t=>`<span class="chip ${t==='protein'||t==='b12'||t==='d'?'':'o'}">${TAGNAME[t]}</span>`).join(''); }
-function openRecipes(id, from){ recReturn=from||S.screen||'home'; recOpen=id||null; recDirect=!!id; show('recipes'); }
+function openRecipes(id, from){ if(!id) recMeal=isToday()?currentSlot():'all'; recReturn=from||S.screen||'home'; recOpen=id||null; recDirect=!!id; show('recipes'); }
 function renderRecipes(){
   const body=document.getElementById('recBody'); if(!body) return;
   document.getElementById('recTitle').textContent = recOpen ? 'Recipe' : 'Quick recipes';
@@ -1696,21 +1699,26 @@ function renderRecipes(){
   }
   const filters=[['all','All'],['b12','B12'],['d','Vitamin D'],['iron','Iron'],['protein','High protein'],...(isVegPerson()?[]:[['veg','Veg'],['nonveg','Chicken, fish & mutton']]),['tofu','Tofu'],['quick','15 min or less']];
   let list=recList();
+  if(!recMeal) recMeal=currentSlot();
+  if(recMeal!=='all') list=list.filter(r=>r.f.slots.includes(recMeal));
   if(recFilter==='veg') list=list.filter(r=>r.f.diet==='veg');
   else if(recFilter==='nonveg') list=list.filter(r=>r.f.diet==='nonveg');
   else if(recFilter==='tofu') list=list.filter(r=>r.id.startsWith('tofu'));
   else if(recFilter==='quick') list=list.filter(r=>r.time<=15);
   else if(recFilter!=='all') list=list.filter(r=>r.f.tags.includes(recFilter));
-  body.innerHTML=`<p class="note" style="margin:4px 0 12px">Simple home recipes, picked for B12, vitamin D, iron and protein.</p>
+  const meals=[['all','All'],['b','Breakfast'],['l','Lunch'],['s','Evening'],['d','Dinner']];
+  body.innerHTML=`<div class="seg rec-meals">${meals.map(([k,l])=>`<button aria-pressed="${k===recMeal}" data-recmeal="${k}">${l}</button>`).join('')}</div>
+    <p class="note" style="margin:12px 0 12px">${recMeal==='all'?'Simple home recipes, picked for B12, vitamin D, iron and protein.':`Easy ${({b:'breakfast',l:'lunch',s:'evening snack',d:'dinner'})[recMeal]} ideas, picked for B12, vitamin D, iron and protein.`}</p>
     <div class="filters" style="flex-wrap:wrap">${filters.map(([k,l])=>`<button aria-pressed="${k===recFilter}" data-recfilter="${k}">${l}</button>`).join('')}</div>
     <div class="rec-list">${list.length?list.map(r=>`<button class="rec-card" data-recopen="${r.id}"><span class="rec-main"><b>${esc(r.f.name)}</b><small>⏱ ${r.time} min · ${fmt(r.f.kcal)} kcal · ${fmt(r.f.p)} g protein</small><span class="chips">${recChips(r.f)}</span></span><span class="arrow" aria-hidden="true">→</span></button>`).join(''):'<div class="empty">No recipes here yet.</div>'}</div>`;
 }
 document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='goRecipes'){ openRecipes(null,'home'); }
   else if(t.dataset.recfilter){ recFilter=t.dataset.recfilter; renderRecipes(); }
+  else if(t.dataset.recmeal){ recMeal=t.dataset.recmeal; renderRecipes(); }
   else if(t.dataset.recopen){ recDirect=false; recOpen=t.dataset.recopen; renderRecipes(); window.scrollTo({top:0}); }
   else if(t.dataset.cook){ openRecipes(t.dataset.cook, S.screen); }
-  else if(t.id==='recLog'){ const slot=isToday()?currentSlot():'l'; const f=addFood(t.dataset.recid, slot); if(f){ toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.disabled=true; t.querySelector('span').textContent='Logged'; } }
+  else if(t.id==='recLog'){ const slot=(recMeal&&recMeal!=='all')?recMeal:(isToday()?currentSlot():'l'); const f=addFood(t.dataset.recid, slot); if(f){ toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.disabled=true; t.querySelector('span').textContent='Logged'; } }
 });
 
 document.getElementById('recBack').onclick=()=>{ if(recOpen && !recDirect){ recOpen=null; renderRecipes(); window.scrollTo({top:0}); return; } show(recReturn==='recipes'?'home':recReturn); };
