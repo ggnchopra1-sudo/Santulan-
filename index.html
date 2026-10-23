@@ -1307,35 +1307,53 @@ async function drawDay(k){
   const dt=keyToDate(k).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
   x.font=`600 28px ${B}`; const pw=x.measureText(dt).width+48; rr(x,W-72-pw,88,pw,56,28); x.fillStyle='rgba(255,255,255,.1)'; x.fill(); x.fillStyle=IVORY; x.fillText(dt,W-72-pw+24,117);
   // title
-  x.textBaseline='alphabetic'; x.fillStyle=IVORY; x.font=`600 76px ${D}`;
-  const who=(S.name||'My').trim(); x.fillText(`${who}${who==='My'?'':"'s"} day`,72,280);
+  x.textBaseline='alphabetic'; x.fillStyle=IVORY; x.font=`600 72px ${D}`;
+  const who=(S.name||'My').trim(); x.fillText(`${who}${who==='My'?'':"'s"} day`,72,254);
   const si=streakInfo(), w=+d.water||0;
-  x.globalAlpha=.75; x.font=`400 28px ${B}`;
-  x.fillText(`${d.meals.length} ${d.meals.length===1?'meal':'meals'} logged · ${w}/${WATER_GOAL} glasses of water${k===todayKey()&&si.count?` · ${si.count}-day streak`:''}`,72,328); x.globalAlpha=1;
+  x.globalAlpha=.75; x.font=`400 27px ${B}`;
+  x.fillText(`${d.meals.length} ${d.meals.length===1?'meal':'meals'} logged · ${w}/${WATER_GOAL} glasses of water${k===todayKey()&&si.count?` · ${si.count}-day streak`:''}`,72,300); x.globalAlpha=1;
   // protein ring
-  const cx=230, cy=560, r=140, pp=Math.min(1,e.p/T.p);
-  x.lineWidth=34; x.lineCap='round';
+  const cx=196, cy=486, r=112, pp=Math.min(1,e.p/T.p);
+  x.lineWidth=28; x.lineCap='round';
   x.strokeStyle='rgba(255,255,255,.12)'; x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.stroke();
   if(pp>0){ x.strokeStyle=LIME; x.beginPath(); x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.02,pp)); x.stroke(); }
-  x.textAlign='center'; x.fillStyle=LIME; x.font=`700 72px ${D}`; x.fillText(`${Math.round(e.p/T.p*100)}%`,cx,cy+18);
-  x.fillStyle=IVORY; x.font=`600 28px ${B}`; x.fillText(`${fmt(e.p)} / ${T.p} g protein`,cx,cy+r+70);
-  x.globalAlpha=.7; x.font=`400 24px ${B}`; x.fillText(`${fmt(e.kcal)} of ${T.kcal} kcal`,cx,cy+r+106); x.globalAlpha=1; x.textAlign='left';
-  // nutrient bars
+  x.textAlign='center'; x.fillStyle=LIME; x.font=`700 60px ${D}`; x.fillText(`${Math.round(e.p/T.p*100)}%`,cx,cy+20);
+  x.fillStyle=IVORY; x.font=`600 26px ${B}`; x.fillText(`${fmt(e.p)} / ${T.p} g protein`,cx,cy+r+58);
+  x.globalAlpha=.7; x.font=`400 22px ${B}`; x.fillText(`${fmt(e.kcal)} of ${T.kcal} kcal`,cx,cy+r+90); x.globalAlpha=1; x.textAlign='left';
+  // nutrient bars: every bar the same length, numbers never overlap the bars
   const rows=[['Fibre','fib','g',0],['Iron','fe','mg',1],['Calcium','ca','mg',0],['B12','b12','mcg',1],['Vit D','d','mcg',1],['Carbs','c','g',0],['Fat','f','g',0]];
-  const bx=470, bw=240, y0=410, step=62;
+  const bx=420, y0=376, step=46, barX=bx+128;
+  const label=(v,t,u,dp)=> v>t*10 ? `${fmt(v,dp)} ${u} ✓` : `${fmt(v,dp)}/${fmt(t,dp)} ${u}`;
+  x.font=`400 23px ${B}`; const textW=Math.max(...rows.map(([l,kk,u,dp])=>x.measureText(label(e[kk],T[kk],u,dp)).width));
+  const bw=Math.max(150, W-72-textW-22-barX);
   rows.forEach(([l,kk,u,dp],i)=>{ const y=y0+i*step, v=e[kk], t=T[kk], q=Math.min(1,v/t);
-    x.fillStyle=IVORY; x.font=`600 26px ${B}`; x.fillText(l,bx,y+9);
-    rr(x,bx+130,y-8,bw,18,9); x.fillStyle='rgba(255,255,255,.1)'; x.fill();
-    if(q>0){ rr(x,bx+130,y-8,Math.max(18,bw*q),18,9); x.fillStyle=(kk==='c'||kk==='f'||q>=.6)?LIME:AMBER; x.fill(); }
-    x.fillStyle=IVORY; x.globalAlpha=.85; x.font=`400 24px ${B}`; x.textAlign='right'; x.fillText(`${fmt(v,dp)}/${fmt(t,dp)} ${u}`,W-72,y+9); x.textAlign='left'; x.globalAlpha=1; });
-  // meals
-  const my=y0+rows.length*step+28;
-  x.strokeStyle='rgba(244,247,236,.18)'; x.lineWidth=2; x.beginPath(); x.moveTo(72,my-24); x.lineTo(W-72,my-24); x.stroke();
-  SLOTS.forEach((s,i)=>{ const col=i%2, row=Math.floor(i/2), tx=72+col*478, ty=my+row*78;
-    const ms=d.meals.filter(m=>m.slot===s.k), sk=d.skipped.includes(s.k);
-    x.fillStyle=LIME; x.font=`600 22px ${B}`; x.fillText(s.name.toUpperCase(),tx,ty+6);
-    x.fillStyle=IVORY; x.globalAlpha=ms.length?1:.5; x.font=`400 26px ${B}`;
-    x.fillText(fitText(x, ms.length? ms.map(mealText).join(', ') : sk?'Skipped':'Not logged', 450),tx,ty+40); x.globalAlpha=1; });
+    x.fillStyle=IVORY; x.font=`600 25px ${B}`; x.fillText(l,bx,y+9);
+    rr(x,barX,y-7,bw,16,8); x.fillStyle='rgba(255,255,255,.1)'; x.fill();
+    if(q>0){ rr(x,barX,y-7,Math.max(16,bw*q),16,8); x.fillStyle=(kk==='c'||kk==='f'||q>=.6)?LIME:AMBER; x.fill(); }
+    x.fillStyle=IVORY; x.globalAlpha=.85; x.font=`400 23px ${B}`; x.textAlign='right'; x.fillText(label(v,t,u,dp),W-72,y+9); x.textAlign='left'; x.globalAlpha=1; });
+  // meals: one row per meal across the full width, wrapping so nothing is cut off
+  const top=752, bottom=1004, lx=72, tx2=300, tw=W-72-tx2;
+  x.strokeStyle='rgba(244,247,236,.18)'; x.lineWidth=2; x.beginPath(); x.moveTo(72,top-36); x.lineTo(W-72,top-36); x.stroke();
+  const clean=t=>t.replace(/\s*\((?![^)]*\d)[^)]*\)/g,'');
+  const items=SLOTS.map(s=>{ const ms=d.meals.filter(m=>m.slot===s.k), sk=d.skipped.includes(s.k); return {s, has:ms.length>0, text: ms.length? clean(ms.map(mealText).join(', ')) : sk?'Skipped':'Not logged'}; });
+  const wrap=(t,width,max)=>{ const words=t.split(' '), lines=[]; let cur='';
+    for(const wd of words){ const tryL=cur?cur+' '+wd:wd; if(x.measureText(tryL).width<=width) cur=tryL; else { if(cur) lines.push(cur); cur=wd; } }
+    if(cur) lines.push(cur);
+    if(lines.length>max){ const keep=lines.slice(0,max); keep[max-1]=fitText(x, lines.slice(max-1).join(' '), width); return keep; }
+    return lines; };
+  // give each meal as many lines as it needs, sharing the space fairly (up to 4 lines each)
+  let plan=null;
+  for(const [fs,lh] of [[25,31],[23,29],[21,27]]){
+    x.font=`400 ${fs}px ${B}`; const full=items.map(it=>wrap(it.text,tw,99));
+    const alloc=full.map(()=>1); let h=items.length*(lh+16)-16;
+    let grew=true; while(grew){ grew=false; for(let n=0;n<items.length;n++){ if(alloc[n]<Math.min(4,full[n].length) && top+h+lh<=bottom){ alloc[n]++; h+=lh; grew=true; } } }
+    plan={fs,lh,ls:items.map((it,n)=>wrap(it.text,tw,alloc[n]))};
+    if(full.every((l,n)=>l.length<=alloc[n])) break; }
+  let yy=top;
+  items.forEach((it,i)=>{ x.fillStyle=LIME; x.font=`600 21px ${B}`; x.fillText(it.s.name.toUpperCase(),lx,yy);
+    x.fillStyle=IVORY; x.globalAlpha=it.has?1:.5; x.font=`400 ${plan.fs}px ${B}`;
+    plan.ls[i].forEach((ln,j)=>x.fillText(ln,tx2,yy+j*plan.lh)); x.globalAlpha=1;
+    yy+=plan.ls[i].length*plan.lh+16; });
   // footer
   x.fillStyle=IVORY; x.globalAlpha=.85; x.font=`600 28px ${B}`; x.fillText('getsantulan.in',72,1036); x.globalAlpha=1;
   x.fillStyle=LIME; x.font=`600 24px ${B}`; x.textAlign='right'; x.fillText('✦ Built with Super Intelligence',W-72,1036); x.textAlign='left';
