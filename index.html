@@ -1050,7 +1050,7 @@ function personalTips(p){
   if(p.diet==='veg'||p.diet==='vegan') t.push('B12 is hard to get on a veg diet. Have milk or curd daily, and ask your doctor about a B12 check.');
   const all=[...goalTips(p),...t];
   if(!all.length) all.push('Keep your plate balanced: half sabzi, a quarter protein, a quarter roti or rice.');
-  return [...new Set(all)];
+  return [...new Set(all.map(dietText))];
 }
 function profileText(p){
   if(!p) return 'an adult in North India';
@@ -1451,7 +1451,7 @@ function sickCardHtml(compact){
     ${n>=3?`<p class="sick-warn">It has been ${n} days. If you are not feeling better, please see a doctor.</p>`:''}
     <div class="sick-rows">
       <div><b>💧 Fluids</b><span>${t.fluids}</span></div>
-      <div><b>🍲 Food</b><span>${t.food}</span></div>
+      <div><b>🍲 Food</b><span>${dietText(t.food)}</span></div>
       <div><b>😴 Rest</b><span>Sleep and rest help you recover faster than anything you eat.</span></div>
       <div><b>🚫 Go easy on</b><span>${t.avoid}</span></div>
     </div>
@@ -1625,6 +1625,8 @@ const RECIPES=[
   steps:['Cook onion and chilli in oil until soft.','Add tomato, haldi and salt. Cook 2 minutes.','Add paneer and garam masala. Mix gently for 2 minutes.','Finish with coriander.'],
   tip:'Paneer gives protein, B12 and calcium. Pair it with roti or stuff it in a paratha.'},
 ];
+function isVegPerson(){ const d=(S.profile&&S.profile.diet)||''; return d==='veg'||d==='vegan'; }
+function dietText(t){ if(!isVegPerson()) return t; return String(t).replace('even just 2 boiled eggs, curd or a glass of milk','even just curd, paneer or a glass of milk').replace('milk, curd or eggs','milk, curd or paneer').replace('Paneer, eggs, dal and soya chunks','Paneer, dal and soya chunks').replace('dal, curd, eggs or paneer','dal, curd or paneer').replace(' plus eggs or fish',''); }
 let recFilter='all', recOpen=null, recReturn='home', recDirect=false;
 function recDietOk(f){ const d=(S.profile&&S.profile.diet)||'nonvegfew'; if(d==='vegan') return f.diet==='veg'&&!f.dairy; if(d==='veg') return f.diet==='veg'; if(d==='egg') return f.diet!=='nonveg'; return true; }
 function recList(){ return RECIPES.map(r=>({...r,f:FOODS.find(x=>x.id===r.id)})).filter(r=>r.f && recDietOk(r.f)); }
@@ -1648,7 +1650,7 @@ function renderRecipes(){
     </article>`;
     return;
   }
-  const filters=[['all','All'],['b12','B12'],['d','Vitamin D'],['iron','Iron'],['protein','High protein'],['veg','Veg'],['tofu','Tofu'],['quick','15 min or less']];
+  const filters=[['all','All'],['b12','B12'],['d','Vitamin D'],['iron','Iron'],['protein','High protein'],...(isVegPerson()?[]:[['veg','Veg']]),['tofu','Tofu'],['quick','15 min or less']];
   let list=recList();
   if(recFilter==='veg') list=list.filter(r=>r.f.diet==='veg');
   else if(recFilter==='tofu') list=list.filter(r=>r.id.startsWith('tofu'));
@@ -1789,7 +1791,7 @@ function renderPlan(){
   if(isToday() && sickGet()){ view.innerHTML=`<div class="note" style="margin:0 0 10px">Sick mode is on, so today's plan is about easy food and fluids, not targets.</div>`+sickCardHtml(false); return; }
   const {rem,out}=buildPlan();
   const skippedPast = isToday() ? SLOTS.filter(s=>s.end<=nowHour() && !S.day.meals.some(m=>m.slot===s.k) && !S.day.skipped.includes(s.k)) : [];
-  let h=`<section><div class="sechead"><h2>${rem.length?'Up next':'Day planned'}</h2><span class="label">${isVegDay()?'Veg-only suggestions':'Veg + non-veg'}</span></div>`;
+  let h=`<section><div class="sechead"><h2>${rem.length?'Up next':'Day planned'}</h2><span class="label">${isVegPerson()?'Vegetarian':isVegDay()?'Veg-only suggestions':'Veg + non-veg'}</span></div>`;
   if(false && skippedPast.length) h+=`<div class="note" style="margin:-4px 0 10px">${skippedPast.map(s=>s.name).join(' and ')} isn't logged, so the plan treats it as skipped and makes up for it later.</div>`;
   if(!rem.length){
     h+=`<div class="done-msg">No meals left to plan for ${isToday()?'today':'this day'}. Check “My day” to see how it balanced out.</div></section>`;
@@ -1879,7 +1881,7 @@ function renderLog(){
       <button class="textlink" data-lstep="input">Edit what I typed</button>`;
   } else if(logStep==='list'){
     h=`${slotHtml}<div class="listtop"><input class="search" id="lsearch" placeholder="Search ${FOODS.length} dishes" autocomplete="off"><button class="filterbtn ${logFilter!=='all'?'on':''}" id="filterBtn" aria-expanded="${filterOpen}">Filter${logFilter!=='all'?' · 1':''}</button></div>
-      ${filterOpen?`<div class="filters" id="lfilters" style="margin-top:10px;flex-wrap:wrap">${[['all','All'],['fits','Fits '+slot.name.toLowerCase()],['protein','High protein'],['b12','B12'],['d','Vit D'],['iron','Iron'],['fibre','Fibre'],['veg','Veg only']].map(([k,l])=>`<button aria-pressed="${k===logFilter}" data-lfilter="${k}">${l}</button>`).join('')}</div>`:''}
+      ${filterOpen?`<div class="filters" id="lfilters" style="margin-top:10px;flex-wrap:wrap">${[['all','All'],['fits','Fits '+slot.name.toLowerCase()],['protein','High protein'],['b12','B12'],['d','Vit D'],['iron','Iron'],['fibre','Fibre'],...(isVegPerson()?[]:[['veg','Veg only']])].map(([k,l])=>`<button aria-pressed="${k===logFilter}" data-lfilter="${k}">${l}</button>`).join('')}</div>`:''}
       <div class="loglist" id="foodList" style="margin-top:12px"></div>`;
   } else {
     h=`${slotHtml}<h3 class="ask">What did you eat?</h3>
@@ -2170,7 +2172,7 @@ function addParsed(){
 function renderFoodList(){
   const el=document.getElementById('foodList'); if(!el) return;
   const q=(document.getElementById('lsearch').value||'').trim().toLowerCase();
-  let list=FOODS.filter(f=>!q || f.name.toLowerCase().includes(q) || f.aliases.some(a=>a.includes(q)));
+  let list=FOODS.filter(f=>recDietOk(f) && (!q || f.name.toLowerCase().includes(q) || f.aliases.some(a=>a.includes(q))));
   if(logFilter==='fits') list=list.filter(f=>f.slots.includes(logSlot));
   else if(logFilter==='veg') list=list.filter(f=>f.diet==='veg');
   else if(logFilter!=='all') list=list.filter(f=>f.tags.includes(logFilter));
