@@ -1427,6 +1427,20 @@ const SICK_TYPES={
     avoid:'Chai, coffee, spicy or fried food, citrus, lying down right after meals.',
     picks:['banana','khichdiplain','curd','oats','coconutwater','papaya','moongdal','daliya'],
     doctor:['Burning that keeps coming back for more than 2 weeks','Pain spreading to the chest, arm or jaw: get help right away']},
+  lowbp:{label:'Low BP or dizziness', icon:'📉',
+    fluids:'8–10 glasses. Nimbu pani with a pinch of salt and sugar, ORS or salted chaas help quickly.',
+    food:'Small meals every 2–3 hours. A big, heavy meal can make the dizziness worse.',
+    rest:'Sit or lie down when you feel dizzy, and get up slowly from bed or a chair.',
+    avoid:'Standing up quickly, long hours in the heat, skipping meals, alcohol.',
+    picks:['nimbupani','ors','chaas','soup','khichdiplain','poha','milk'],
+    doctor:['Fainting, chest pain, a racing heart or confusion','Dizziness that keeps coming back, or if you already take BP medicine']},
+  highbp:{label:'High BP', icon:'📈',
+    fluids:'8–10 glasses of plain water. Coconut water is a good choice too.',
+    food:'Fill up on sabzi, fruit, dal and curd. Cook with less salt and skip extra salt at the table.',
+    rest:'Rest, take slow deep breaths and keep stress low. A gentle 10–15 minute walk is fine if you feel okay.',
+    avoid:'Achar, papad, namkeen, chips, instant noodles, packaged and fried food, too much chai or coffee.',
+    picks:['banana','coconutwater','curd','moongdal','fruit','oats','sprouts','palakdal'],
+    doctor:['A reading of 180/120 or higher, a severe headache, chest pain, breathlessness or blurred vision: get help right away','Weakness or numbness on one side, or trouble speaking: go to the emergency right away','If you take BP medicine, keep taking it as prescribed. Do not stop it on your own.']},
   weak:{label:'Weak or low', icon:'🥱',
     fluids:'8–10 glasses. Coconut water or nimbu pani gives a gentle boost.',
     food:"Don't skip meals. Add easy protein like dal, curd, eggs or paneer to each one.",
@@ -1454,7 +1468,7 @@ function sickCardHtml(compact){
     <div class="sick-rows">
       <div><b>💧 Fluids</b><span>${t.fluids}</span></div>
       <div><b>🍲 Food</b><span>${dietText(t.food)}</span></div>
-      <div><b>😴 Rest</b><span>Sleep and rest help you recover faster than anything you eat.</span></div>
+      <div><b>😴 Rest</b><span>${t.rest||'Sleep and rest help you recover faster than anything you eat.'}</span></div>
       <div><b>🚫 Go easy on</b><span>${t.avoid}</span></div>
     </div>
     ${compact?'':`<span class="label" style="display:block;margin:14px 0 8px">Easy to eat · one tap to add</span>
