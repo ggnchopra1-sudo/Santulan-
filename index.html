@@ -1545,6 +1545,7 @@ document.addEventListener('click',e=>{
 
 
 /* ---------- quick recipes ---------- */
+const CURRY_ING=['400 g chicken on the bone, cut in curry pieces','2 onions, finely chopped','2 tomatoes, pureed','1 tbsp ginger-garlic paste, 2 green chillies','½ tsp haldi, 1 tsp chilli powder, 1½ tsp dhania powder, 1 tsp garam masala','2 tbsp curd, whole spices (1 bay leaf, 2 elaichi, 3 cloves)','1½ tbsp oil, salt, coriander'], CURRY_STEPS=['Mix chicken with curd, haldi and salt. Rest 15 minutes (or overnight in the fridge).','Heat oil in a cooker or kadai. Add whole spices, then onions. Cook until deep golden, 8–10 minutes.','Add ginger-garlic paste and chillies, cook 1 minute. Add chilli and dhania powder with a splash of water.','Add tomato puree and cook until oil separates, about 5 minutes.','Add the chicken and cook on high for 5 minutes. Add 1 cup water and pressure cook 2 whistles (or simmer covered 20 minutes).','Finish with garam masala and coriander.'];
 const RECIPES=[
  {id:'tofubhurjiroti', time:15, serves:1, ing:['150 g firm tofu, crumbled','1 small onion, chopped','1 tomato, chopped','1 green chilli, ½ tsp ginger-garlic paste','¼ tsp haldi, ½ tsp garam masala, salt','1 tsp oil, fresh coriander','2 roti'],
   steps:['Heat oil in a pan. Sauté onion until soft, about 3 minutes.','Add ginger-garlic paste and green chilli, cook 30 seconds.','Add tomato, haldi and salt. Cook until soft, about 3 minutes.','Add crumbled tofu and garam masala. Mix well and cook 4–5 minutes on medium heat.','Finish with coriander. Serve hot with 2 roti.'],
@@ -1624,6 +1625,49 @@ const RECIPES=[
  {id:'paneerbhurjicurry', time:15, serves:1, ing:['100 g paneer, crumbled','1 onion, 1 tomato, chopped','1 green chilli, coriander','¼ tsp haldi, ½ tsp garam masala, salt','1 tsp oil'],
   steps:['Cook onion and chilli in oil until soft.','Add tomato, haldi and salt. Cook 2 minutes.','Add paneer and garam masala. Mix gently for 2 minutes.','Finish with coriander.'],
   tip:'Paneer gives protein, B12 and calcium. Pair it with roti or stuff it in a paratha.'},
+ {id:'chickenroti', time:35, serves:3, ing:CURRY_ING.concat(['2 roti per person']), steps:CURRY_STEPS.concat(['Serve with 2 roti and a bowl of salad.']),
+  tip:'Cook a full batch. It tastes even better the next day and keeps 2 days in the fridge.'},
+ {id:'chickenrice', time:35, serves:3, ing:CURRY_ING.concat(['1 plate cooked rice per person']), steps:CURRY_STEPS.concat(['Serve over rice with sliced onion and lemon.']),
+  tip:'Use less rice and more chicken and salad when you want a lighter plate.'},
+ {id:'chickentikka', time:30, serves:2, ing:['300 g boneless chicken, cubed','4 tbsp hung curd','1 tsp ginger-garlic paste, 1 tsp lemon juice','1 tsp chilli powder, ½ tsp haldi, 1 tsp garam masala, 1 tsp kasuri methi','1 tbsp mustard oil or any oil, salt','Onion and capsicum pieces'],
+  steps:['Mix curd, ginger-garlic paste, lemon, spices, oil and salt into a thick marinade.','Coat chicken, onion and capsicum. Rest at least 20 minutes, or overnight.','Thread on skewers or spread in a pan.','Cook on a hot tawa 4–5 minutes per side, or bake at 220°C for 15–18 minutes, until charred at the edges.','Serve with mint chutney, onion and lemon.'],
+  tip:'Mustard oil in the marinade gives the dhaba-style flavour.'},
+ {id:'chicktikkaroti', time:30, serves:2, ing:['Chicken tikka (see the Chicken tikka recipe)','4 roti','1 bowl salad: cucumber, onion, tomato, lemon'],
+  steps:['Make the chicken tikka.','Warm the roti on the tawa.','Toss the salad with lemon, salt and chaat masala.','Serve tikka with roti, salad and mint chutney.'],
+  tip:'Roll the tikka and salad in a roti for an easy office lunch.'},
+ {id:'grilledchicken', time:25, serves:1, ing:['150 g boneless chicken breast','1 tsp lemon juice, 1 tsp ginger-garlic paste','½ tsp each: pepper, chilli flakes, oregano or ajwain','1 tsp oil, salt','Salad: lettuce or cabbage, cucumber, tomato'],
+  steps:['Flatten the chicken a little with a rolling pin so it cooks evenly.','Rub with lemon, ginger-garlic paste, spices, oil and salt. Rest 10 minutes.','Cook on a hot grill pan or tawa, 5–6 minutes per side, until cooked through.','Rest 2 minutes, slice and serve over salad.'],
+  tip:'Don\'t keep flipping it. One flip gives the best colour.'},
+ {id:'tandoori', time:40, serves:2, ing:['½ chicken (4 pieces, on the bone), with deep cuts','4 tbsp hung curd','1 tbsp ginger-garlic paste, 1 tbsp lemon juice','1½ tsp Kashmiri chilli powder, 1 tsp tandoori masala, ½ tsp garam masala','1 tbsp mustard oil, salt','Onion rings, lemon, mint chutney'],
+  steps:['Rub chicken with lemon juice, salt and chilli powder. Rest 15 minutes.','Mix curd, ginger-garlic paste, masalas and oil. Coat the chicken well, into the cuts. Rest 1 hour or overnight.','Bake at 220°C for 25–30 minutes, turning once. Or cook covered in a heavy pan on low for 20 minutes, then char on high.','Serve with onion rings, lemon and chutney.'],
+  tip:'The longer it marinates, the softer and juicier it gets.'},
+ {id:'chickenkeema', time:25, serves:2, ing:['300 g chicken mince (keema)','1 onion, 1 tomato, chopped','½ cup peas','1 tsp ginger-garlic paste, 1 green chilli','½ tsp haldi, 1 tsp chilli powder, 1 tsp dhania powder, ½ tsp garam masala','1 tbsp oil, salt, coriander'],
+  steps:['Cook onion in oil until golden. Add ginger-garlic paste and chilli.','Add tomato and the spice powders. Cook until soft.','Add keema and break it up. Cook on high 5 minutes until it changes colour.','Add peas and ¼ cup water. Cover and cook 8–10 minutes.','Finish with garam masala and coriander. Serve with roti or pav.'],
+  tip:'Keema cooks fast, so it is a great weeknight protein. Stuff leftovers into a paratha.'},
+ {id:'chickensoup', time:30, serves:2, ing:['200 g chicken on the bone','1 small onion, 1 carrot, a few beans, chopped','3 garlic cloves, 1 inch ginger, crushed','½ tsp black pepper, salt','4 cups water, coriander, lemon'],
+  steps:['Put chicken, garlic, ginger, onion and water in a cooker.','Pressure cook 3 whistles.','Take out the chicken, shred the meat and put it back. Add carrot and beans.','Simmer 5 minutes. Season with pepper and salt.','Finish with coriander and a squeeze of lemon.'],
+  tip:'A good pick in sick mode: warm, light and full of fluids.'},
+ {id:'butterchicken', time:40, serves:3, ing:['400 g boneless chicken, marinated in 3 tbsp curd, chilli powder, salt','3 tomatoes, 8 cashews, 1 tsp ginger-garlic paste','1 tsp Kashmiri chilli powder, 1 tsp kasuri methi, ½ tsp garam masala','1 tbsp butter, 2 tbsp fresh cream, 1 tsp honey, salt'],
+  steps:['Grill or pan-cook the marinated chicken until lightly charred. Keep aside.','Boil tomatoes and cashews with ginger-garlic paste for 10 minutes, then blend smooth.','Melt butter, add the puree and chilli powder. Simmer 8 minutes.','Add chicken, kasuri methi, garam masala, honey and salt. Simmer 5 minutes.','Stir in cream and serve with roti.'],
+  tip:'This home version uses one spoon of butter and two of cream, much lighter than the restaurant one.'},
+ {id:'kadaichicken', time:35, serves:3, ing:['400 g chicken, curry cut','1 capsicum, 1 onion, cut in squares','2 tomatoes, chopped','1 tbsp ginger-garlic paste','Kadai masala: 1 tbsp coriander seeds, 3 dry red chillies, 1 tsp jeera (dry roast and crush)','1½ tbsp oil, salt, kasuri methi'],
+  steps:['Dry roast coriander seeds, chillies and jeera. Crush coarsely.','Heat oil, add ginger-garlic paste, then chicken. Cook on high 5 minutes.','Add tomatoes, salt and half the kadai masala. Cover and cook 15 minutes.','Add capsicum and onion squares with the rest of the masala. Cook 3 minutes so they stay crunchy.','Finish with kasuri methi.'],
+  tip:'Freshly crushed kadai masala is what makes this dish. Make extra and store it.'},
+ {id:'biryani', time:45, serves:3, ing:['400 g chicken, marinated in ½ cup curd, 1 tbsp biryani masala, ginger-garlic paste, salt','1½ cups basmati rice, soaked 20 minutes','2 onions, thinly sliced','Whole spices: bay leaf, 4 cloves, 4 elaichi, 1 inch dalchini','Mint and coriander, 1 tbsp ghee, 1 tbsp oil'],
+  steps:['In a cooker, fry onions in oil and ghee until deep brown. Take out half for topping.','Add whole spices, then the marinated chicken. Cook on high 7–8 minutes.','Add mint, coriander, rice and 2¼ cups water. Check salt.','Pressure cook 1 whistle, then rest 10 minutes before opening.','Fluff gently, top with the fried onions and serve with raita.'],
+  tip:'Cooker biryani is ready in under an hour. Raita on the side adds B12 and calcium.'},
+ {id:'muttonroti', time:60, serves:3, ing:['500 g mutton, curry cut','2 onions, 2 tomatoes, chopped','1 tbsp ginger-garlic paste, ½ cup curd','½ tsp haldi, 1½ tsp chilli powder, 2 tsp dhania powder, 1 tsp garam masala','Whole spices: bay leaf, 3 cloves, 2 elaichi','2 tbsp oil, salt','2 roti per person'],
+  steps:['Marinate mutton with curd, haldi, ginger-garlic paste and salt for 30 minutes.','In a cooker, heat oil, add whole spices and onions. Cook until golden brown.','Add tomatoes and spice powders. Cook until oil separates.','Add mutton and cook on high 8–10 minutes.','Add 1½ cups water and pressure cook 5–6 whistles until tender.','Finish with garam masala. Serve with roti.'],
+  tip:'Mutton is rich in B12 and iron. A katori once a week is plenty.'},
+ {id:'fish', time:30, serves:2, ing:['300 g fish (rohu or surmai), in pieces','1 onion, 2 tomatoes, pureed','1 tsp ginger-garlic paste, 1 tsp mustard seeds or jeera','½ tsp haldi, 1 tsp chilli powder, 1 tsp dhania powder','2 tbsp mustard oil, salt, coriander','Cooked rice'],
+  steps:['Rub fish with haldi and salt. Lightly fry in mustard oil, 2 minutes per side. Keep aside.','In the same oil, add mustard seeds or jeera, then onion. Cook until golden.','Add ginger-garlic paste, spice powders and tomato. Cook until thick.','Add 1 cup water and bring to a boil. Slide in the fish.','Simmer 6–8 minutes without stirring. Serve with rice.'],
+  tip:'Shake the pan instead of stirring so the fish pieces stay whole.'},
+ {id:'fishfry', time:20, serves:2, ing:['300 g fish (surmai, pomfret or rohu) slices','1 tsp chilli powder, ½ tsp haldi, 1 tsp ginger-garlic paste','1 tsp lemon juice, salt','3 tbsp rava or rice flour for coating','1–2 tbsp oil'],
+  steps:['Mix spices, ginger-garlic paste, lemon and salt into a paste.','Coat the fish and rest 15 minutes.','Press each piece in rava on both sides.','Shallow-fry on a hot tawa, 3–4 minutes per side, until crisp.'],
+  tip:'Tawa-fry with a little oil instead of deep-frying to keep it light.'},
+ {id:'prawn', time:25, serves:2, ing:['250 g prawns, cleaned','1 onion, 2 tomatoes, chopped','1 tsp ginger-garlic paste, 1 green chilli','½ tsp haldi, 1 tsp chilli powder, 1 tsp dhania powder','½ cup coconut milk (optional), 1 tbsp oil, salt, coriander'],
+  steps:['Toss prawns with haldi and salt.','Cook onion in oil until golden. Add ginger-garlic paste and chilli.','Add tomatoes and spice powders. Cook until soft and thick.','Add prawns and cook 3–4 minutes until they turn pink and curl.','Add coconut milk if using, simmer 2 minutes. Finish with coriander.'],
+  tip:'Prawns cook in minutes. Overcooking makes them rubbery.'},
 ];
 function isVegPerson(){ const d=(S.profile&&S.profile.diet)||''; return d==='veg'||d==='vegan'; }
 function dietText(t){ if(!isVegPerson()) return t; return String(t).replace('even just 2 boiled eggs, curd or a glass of milk','even just curd, paneer or a glass of milk').replace('milk, curd or eggs','milk, curd or paneer').replace('Paneer, eggs, dal and soya chunks','Paneer, dal and soya chunks').replace('dal, curd, eggs or paneer','dal, curd or paneer').replace(' plus eggs or fish',''); }
@@ -1650,9 +1694,10 @@ function renderRecipes(){
     </article>`;
     return;
   }
-  const filters=[['all','All'],['b12','B12'],['d','Vitamin D'],['iron','Iron'],['protein','High protein'],...(isVegPerson()?[]:[['veg','Veg']]),['tofu','Tofu'],['quick','15 min or less']];
+  const filters=[['all','All'],['b12','B12'],['d','Vitamin D'],['iron','Iron'],['protein','High protein'],...(isVegPerson()?[]:[['veg','Veg'],['nonveg','Chicken, fish & mutton']]),['tofu','Tofu'],['quick','15 min or less']];
   let list=recList();
   if(recFilter==='veg') list=list.filter(r=>r.f.diet==='veg');
+  else if(recFilter==='nonveg') list=list.filter(r=>r.f.diet==='nonveg');
   else if(recFilter==='tofu') list=list.filter(r=>r.id.startsWith('tofu'));
   else if(recFilter==='quick') list=list.filter(r=>r.time<=15);
   else if(recFilter!=='all') list=list.filter(r=>r.f.tags.includes(recFilter));
