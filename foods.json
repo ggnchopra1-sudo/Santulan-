@@ -4436,7 +4436,7 @@
    "slots": "bsd",
    "diet": "veg",
    "dairy": true,
-   "plan": true,
+   "plan": false,
    "serving": "1 scoop in water",
    "kcal": 120.0,
    "p": 24.0,
@@ -4462,7 +4462,7 @@
    "slots": "bsd",
    "diet": "veg",
    "dairy": true,
-   "plan": true,
+   "plan": false,
    "serving": "250 ml + 1 scoop",
    "kcal": 270.0,
    "p": 32.0,
@@ -7428,6 +7428,60 @@
    "d": 10.0,
    "fe": 10.0,
    "ca": 100.0
+  },
+  {
+   "id": "sattudrink",
+   "name": "Sattu drink",
+   "aliases": [
+    "sattu",
+    "sattu drink",
+    "sattu sharbat",
+    "sattu sherbet",
+    "namkeen sattu",
+    "chana sattu",
+    "sattu ka sharbat"
+   ],
+   "cat": "drinks",
+   "slots": "bls",
+   "diet": "veg",
+   "dairy": false,
+   "plan": true,
+   "serving": "1 glass (50 g sattu)",
+   "kcal": 200.0,
+   "p": 11.0,
+   "c": 32.0,
+   "f": 3.0,
+   "fib": 9.0,
+   "b12": 0.0,
+   "d": 0.0,
+   "fe": 3.6,
+   "ca": 50.0
+  },
+  {
+   "id": "milkchana",
+   "name": "Milk + roasted chana",
+   "aliases": [
+    "milk with chana",
+    "milk and roasted chana",
+    "milk and chana",
+    "doodh chana",
+    "milk with roasted chana"
+   ],
+   "cat": "drinks",
+   "slots": "bs",
+   "diet": "veg",
+   "dairy": true,
+   "plan": true,
+   "serving": "1 glass milk + 1 handful chana",
+   "kcal": 260.0,
+   "p": 14.5,
+   "c": 29.0,
+   "f": 9.8,
+   "fib": 5.0,
+   "b12": 1.1,
+   "d": 0.1,
+   "fe": 1.6,
+   "ca": 320.0
   }
  ]
 }
