@@ -7221,7 +7221,19 @@
     "methylcobalamin 1500",
     "b12 1500",
     "b 12 tablet",
-    "b12 tab"
+    "b12 tab",
+    "b12",
+    "vitamin b12",
+    "b 12",
+    "vitamin b 12",
+    "b12 goli",
+    "b12 ki goli",
+    "b12 medicine",
+    "b12 tabs",
+    "b12 capsules",
+    "b12 pill",
+    "b12 vitamin",
+    "vit b12"
    ],
    "cat": "supplements",
    "slots": "blsd",
@@ -7300,7 +7312,17 @@
     "vitamin d tablet",
     "d3 1000",
     "vitamin d supplement",
-    "d3 supplement"
+    "d3 supplement",
+    "d3",
+    "vitamin d3",
+    "vitamin d",
+    "d 3",
+    "vitamin d 3",
+    "d3 goli",
+    "d3 ki goli",
+    "vit d3",
+    "vit d",
+    "d3 medicine"
    ],
    "cat": "supplements",
    "slots": "blsd",
@@ -7358,7 +7380,10 @@
     "calcium d3",
     "calcium + d3",
     "calcium supplement",
-    "shelcal"
+    "shelcal",
+    "calcium goli",
+    "calcium ki goli",
+    "calcium medicine"
    ],
    "cat": "supplements",
    "slots": "blsd",
@@ -7385,7 +7410,10 @@
     "ferrous",
     "iron folic acid",
     "ifa tablet",
-    "iron capsule"
+    "iron capsule",
+    "iron goli",
+    "iron ki goli",
+    "iron medicine"
    ],
    "cat": "supplements",
    "slots": "blsd",
