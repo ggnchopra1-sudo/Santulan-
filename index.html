@@ -748,6 +748,100 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 .cook{border:0;background:none;padding:0;margin-top:4px;font-size:12.5px;font-weight:700;color:var(--olive);text-decoration:underline;text-underline-offset:2px}
 .rec-meals{margin-top:6px}
 .rec-meals button{padding:9px 6px;font-size:13.5px}
+
+/* ---------- Ask Santulan ---------- */
+@property --ask-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+.ask-pill{position:relative;display:flex;align-items:center;gap:14px;width:100%;border:0;border-radius:24px;padding:14px 16px;background:var(--card);color:var(--ink);text-align:left;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
+.ask-pill::before{content:"";position:absolute;inset:-2px;border-radius:26px;padding:2px;background:conic-gradient(from var(--ask-a),#C8F250,#4FE3C1,#8B7CFF,#FF8FB1,#C8F250);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:askSpin 4s linear infinite;z-index:-1}
+.ask-pill-orb{width:46px;height:46px;border-radius:50%;flex:none;background:radial-gradient(circle at 30% 30%,#F6FFB0,#C8F250 35%,#4FE3C1 60%,#8B7CFF 90%);box-shadow:0 0 22px rgba(200,242,80,.55);animation:orbBreath 3s ease-in-out infinite}
+.ask-pill-txt{display:flex;flex-direction:column;flex:1;min-width:0}
+.ask-pill-txt b{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:-.02em}
+.ask-pill-txt small{font-size:13px;color:var(--muted)}
+.ask-pill-spark{font-size:18px;color:var(--olive);animation:sparkle 2.4s ease-in-out infinite}
+@keyframes askSpin{to{--ask-a:360deg}}
+@keyframes orbBreath{0%,100%{transform:scale(1);filter:hue-rotate(0deg)}50%{transform:scale(1.08);filter:hue-rotate(25deg)}}
+@keyframes sparkle{0%,100%{transform:scale(1) rotate(0);opacity:.7}50%{transform:scale(1.25) rotate(20deg);opacity:1}}
+
+#askOverlay{position:fixed;inset:0;z-index:70;background:#06150E;color:#EEF6E8;display:flex;flex-direction:column;clip-path:circle(0 at var(--ox,50%) var(--oy,50%));transition:clip-path .75s cubic-bezier(.7,0,.2,1);overflow:hidden}
+#askOverlay.open{clip-path:circle(150% at var(--ox,50%) var(--oy,50%))}
+#askOverlay.closing{transition:clip-path .45s cubic-bezier(.6,0,.4,1);clip-path:circle(0 at var(--ox,50%) var(--oy,50%))}
+.ask-aurora{position:absolute;inset:0;pointer-events:none;filter:blur(60px);opacity:.75}
+.ask-aurora i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;mix-blend-mode:screen}
+.ask-aurora i:nth-child(1){background:radial-gradient(circle,#2E7D4F 0,transparent 60%);left:-30vmax;top:-25vmax;animation:aur1 14s ease-in-out infinite alternate}
+.ask-aurora i:nth-child(2){background:radial-gradient(circle,#1F5F73 0,transparent 60%);right:-35vmax;top:10vmax;animation:aur2 18s ease-in-out infinite alternate}
+.ask-aurora i:nth-child(3){background:radial-gradient(circle,#4A3C8C 0,transparent 60%);left:-10vmax;bottom:-40vmax;animation:aur3 16s ease-in-out infinite alternate}
+@keyframes aur1{to{transform:translate(20vmax,15vmax) scale(1.2)}}
+@keyframes aur2{to{transform:translate(-15vmax,20vmax) scale(.9)}}
+@keyframes aur3{to{transform:translate(15vmax,-20vmax) scale(1.15)}}
+.ask-edge{position:absolute;inset:0;pointer-events:none;border-radius:0;padding:3px;background:conic-gradient(from var(--ask-a),#C8F250,#4FE3C1,#8B7CFF,#FF8FB1,#FFC46B,#C8F250);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:askSpin 3s linear infinite,edgeIn 2.4s ease-out both;filter:drop-shadow(0 0 12px rgba(200,242,80,.7))}
+#askOverlay.thinking .ask-edge{animation:askSpin 1.1s linear infinite;opacity:1}
+@keyframes edgeIn{0%{opacity:0}15%{opacity:1}100%{opacity:.35}}
+.ask-top{position:relative;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 14px) max(18px,env(safe-area-inset-right,0px)) 6px max(18px,env(safe-area-inset-left,0px))}
+.ask-brand{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.01em;background:linear-gradient(90deg,#C8F250,#4FE3C1,#B6A8FF,#C8F250);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradText 6s linear infinite}
+.ask-x{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:#EEF6E8;font-size:24px;line-height:1}
+.ask-scroll{position:relative;flex:1;overflow-y:auto;padding:0 max(18px,env(safe-area-inset-right,0px)) 16px max(18px,env(safe-area-inset-left,0px))}
+.ask-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 0 10px}
+.ask-orb{position:relative;width:104px;height:104px;margin-bottom:18px}
+.ask-orb i{position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(2px)}
+.ask-orb i:nth-child(1){background:radial-gradient(circle at 35% 35%,#F6FFB0,#C8F250 40%,transparent 70%);animation:orbA 4s ease-in-out infinite}
+.ask-orb i:nth-child(2){background:radial-gradient(circle at 65% 40%,#4FE3C1,transparent 65%);animation:orbB 5s ease-in-out infinite}
+.ask-orb i:nth-child(3){background:radial-gradient(circle at 45% 70%,#8B7CFF,transparent 65%);animation:orbC 6s ease-in-out infinite}
+.ask-orb::after{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(200,242,80,.35),transparent 65%);animation:orbBreath 3s ease-in-out infinite}
+#askOverlay.thinking .ask-orb i{animation-duration:1.2s,1.4s,1.6s}
+#askOverlay.thinking .ask-orb{animation:orbSpin 1.2s linear infinite}
+@keyframes orbA{0%,100%{transform:scale(1) translate(0,0)}50%{transform:scale(1.12) translate(4px,-3px)}}
+@keyframes orbB{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(.9) rotate(120deg)}}
+@keyframes orbC{0%,100%{transform:scale(.95) translate(0,0)}50%{transform:scale(1.1) translate(-5px,4px)}}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+.ask-hi{font-family:var(--f-display);font-weight:600;font-size:30px;letter-spacing:-.035em;margin:0;animation:blurIn .7s cubic-bezier(.2,.8,.2,1) .35s both}
+.ask-q{font-family:var(--f-display);font-weight:600;font-size:clamp(26px,7.4vw,34px);line-height:1.1;letter-spacing:-.035em;margin:6px 0 0;max-width:16ch;background:linear-gradient(90deg,#C8F250 0%,#4FE3C1 30%,#B6A8FF 60%,#FF9EC0 80%,#C8F250 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:blurIn .8s cubic-bezier(.2,.8,.2,1) .55s both,gradText 5s linear 1.2s infinite}
+@keyframes gradText{to{background-position:250% 0}}
+@keyframes blurIn{from{opacity:0;filter:blur(14px);transform:translateY(10px) scale(.98)}to{opacity:1;filter:blur(0);transform:none}}
+.ask-hero.calm .ask-hi{animation:none}
+.ask-hero.calm .ask-q{animation:gradText 5s linear infinite}
+.ask-you{align-self:flex-end;margin:14px 0 4px auto;max-width:80%;background:rgba(200,242,80,.14);border:1px solid rgba(200,242,80,.35);color:#EEF6E8;border-radius:18px 18px 6px 18px;padding:10px 14px;font-size:15px;width:fit-content;animation:blurIn .45s ease both}
+.ask-sec{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:-.01em;margin:22px 0 10px;background:linear-gradient(90deg,#FF9EC0,#FFC46B);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;animation:blurIn .6s ease var(--d,0s) both}
+.ask-match{position:relative;border-radius:26px;padding:2px;background:conic-gradient(from var(--ask-a),#C8F250,#4FE3C1,#8B7CFF,#FF8FB1,#C8F250);animation:askSpin 5s linear infinite,blurIn .7s cubic-bezier(.2,.8,.2,1) var(--d,0s) both;box-shadow:0 20px 50px -20px rgba(200,242,80,.45)}
+.ask-match-in{border-radius:24px;background:linear-gradient(160deg,#10281C,#0B1D14);padding:18px}
+.ask-tag{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#C8F250}
+.ask-match h3{font-family:var(--f-display);font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin:8px 0 4px;color:#F4F7EC}
+.ask-meta{font-size:13.5px;opacity:.75}
+.ask-why{margin:12px 0 0;font-size:14px;line-height:1.45;background:rgba(200,242,80,.08);border-radius:14px;padding:10px 12px}
+.ask-why b{color:#C8F250}
+.ask-chipsrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ask-chipsrow span{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(200,242,80,.16);color:#DDF88A}
+.ask-acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.ask-btn{flex:1;min-width:120px;border:0;border-radius:99px;padding:13px 16px;font-weight:700;font-size:15px;background:#C8F250;color:#0E2A1E;display:flex;justify-content:center;gap:8px;align-items:center}
+.ask-btn.ghost{background:rgba(255,255,255,.08);color:#EEF6E8;border:1px solid rgba(255,255,255,.14)}
+.ask-btn.done{background:#173E2B;color:#C8F250}
+.ask-row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x mandatory;margin:0 -2px}
+.ask-alt{flex:none;width:200px;scroll-snap-align:start;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:14px;display:flex;flex-direction:column;gap:6px;animation:blurIn .55s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.ask-alt b{font-weight:600;font-size:15px;line-height:1.25;color:#F4F7EC}
+.ask-alt small{font-size:12.5px;opacity:.7}
+.ask-alt .why{font-size:12.5px;color:#C8F250;opacity:.95}
+.ask-alt .ask-mini{margin-top:auto;display:flex;gap:6px}
+.ask-alt .ask-mini button{flex:1;border:0;border-radius:99px;padding:8px;font-weight:700;font-size:13px;background:#C8F250;color:#0E2A1E}
+.ask-alt .ask-mini button.ghost{background:rgba(255,255,255,.1);color:#EEF6E8}
+.ask-skel{border-radius:24px;background:rgba(255,255,255,.08);height:210px;position:relative;overflow:hidden;margin-top:18px}
+.ask-skel.sm{height:120px}
+.ask-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(200,242,80,.12),rgba(139,124,255,.12),transparent);animation:shimmer 1.2s ease-in-out infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.ask-empty{text-align:center;opacity:.8;margin-top:16px;font-size:14.5px}
+.ask-bar{position:relative;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 10px) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(to top,#06150E 70%,rgba(6,21,14,0))}
+.ask-chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px}
+.ask-chips button{flex:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:#EEF6E8;border-radius:99px;padding:8px 13px;font-size:13.5px;font-weight:600;animation:blurIn .5s ease var(--d,0s) both}
+.ask-input{position:relative;display:flex;gap:8px;align-items:center;border-radius:99px;padding:6px 6px 6px 16px;background:rgba(255,255,255,.07);isolation:isolate}
+.ask-input::before{content:"";position:absolute;inset:-1.5px;border-radius:99px;padding:1.5px;background:conic-gradient(from var(--ask-a),#C8F250,#4FE3C1,#8B7CFF,#FF8FB1,#C8F250);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:askSpin 4s linear infinite;opacity:.6;z-index:-1}
+.ask-input:focus-within::before{opacity:1}
+.ask-input input{flex:1;min-width:0;border:0;background:transparent;color:#F4F7EC;font:inherit;font-size:16px;padding:8px 0}
+.ask-input input::placeholder{color:rgba(238,246,232,.5)}
+.ask-input input:focus{outline:none}
+.ask-mic,.ask-go{width:42px;height:42px;border-radius:50%;border:0;flex:none;font-size:18px}
+.ask-mic{background:rgba(255,255,255,.1);color:#EEF6E8}
+.ask-mic.listening{background:#C8F250;color:#0E2A1E;animation:orbBreath 1s ease-in-out infinite}
+.ask-go{background:#C8F250;color:#0E2A1E;font-weight:700}
+.ask-note{margin:8px 0 0;text-align:center;font-size:11.5px;opacity:.5}
+@media (prefers-reduced-motion:reduce){#askOverlay,#askOverlay *,.ask-pill::before,.ask-pill-orb,.ask-pill-spark{animation:none!important;transition:none!important}#askOverlay{clip-path:none}}
 </style>
 </head>
 <body>
@@ -866,6 +960,7 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
       <div id="installHow" class="install-how" hidden></div>
       <div class="rh-btns"><button class="btn primary" id="installBtn">Install</button><button class="btn" id="installLater">Not now</button></div>
     </div>
+    <button class="ask-pill" id="askOpen" aria-label="Ask Santulan what to eat"><span class="ask-pill-orb" aria-hidden="true"></span><span class="ask-pill-txt"><b>Ask Santulan</b><small>What do you feel like eating?</small></span><span class="ask-pill-spark" aria-hidden="true">✦</span></button>
     <div class="streak" id="streakCard" aria-live="polite"></div>
     <div id="waterHome"></div>
     <div class="fact" aria-live="polite">
@@ -933,6 +1028,17 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
   </div>
 </div>
 <div class="cel-overlay" id="celOverlay" hidden role="dialog" aria-modal="true" aria-label="Celebration"></div>
+<div id="askOverlay" hidden role="dialog" aria-modal="true" aria-label="Ask Santulan">
+  <div class="ask-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="ask-edge" aria-hidden="true"></div>
+  <div class="ask-top"><span class="ask-brand">✦ Ask Santulan</span><button class="ask-x" id="askClose" aria-label="Close">×</button></div>
+  <div class="ask-scroll" id="askScroll"><div id="askBody"></div></div>
+  <div class="ask-bar">
+    <div class="ask-chips" id="askChips"></div>
+    <form class="ask-input" id="askForm" autocomplete="off"><input id="askText" placeholder="Something light, spicy, high protein…" aria-label="What do you feel like eating?"><button type="button" class="ask-mic" id="askMic" aria-label="Speak">🎙</button><button class="ask-go" aria-label="Ask">→</button></form>
+    <p class="ask-note">Suggestions are based on what your day still needs.</p>
+  </div>
+</div>
 <div id="mornOverlay" hidden role="dialog" aria-modal="true" aria-label="Your daily balance"></div>
 <div class="toast" id="toast" hidden></div>
 <div id="demoBadge" hidden style="position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:9;font:600 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;background:#0E3B2A;color:#C8F250;padding:6px 10px;border-radius:99px;opacity:.85">Demo</div>
@@ -1770,6 +1876,122 @@ function coverFor(k){ const cv={};
   return cv; }
 function effTotals(e,T,k){ const cv=coverFor(k), o=Object.assign({},e); for(const n in cv){ if(o[n]<T[n]) o[n]=T[n]; } return {e:o, cv}; }
 async function preloadWeek(k){ for(let i=1;i<7;i++){ try{ await loadDay(shiftKey(k,-i)); }catch(e){} } }
+
+
+/* ---------- Ask Santulan: the right meal for right now ---------- */
+const ASK_CHIPS=[['Something light','light'],['High protein','protein'],['Quick, 10 min','quick'],['Spicy','spicy'],['Sweet craving','sweet'],['Comfort food','comfort'],['Healthy street food','street'],['More iron','iron']];
+const ASK_INTENTS=[
+  [/\b(light|halka|halki|small|chhota|thoda)\b/, f=>f.kcal<=350],
+  [/\b(heavy|filling|very hungry|bhook|bhookh|bahut bhook|full meal)\b/, f=>f.kcal>=450],
+  [/\b(protein|gym|muscle|workout)\b/, f=>f.p>=18],
+  [/\b(quick|fast|jaldi|10 min|instant|no cooking|lazy)\b/, f=>RECIPES.some(r=>r.id===f.id&&r.time<=15) || ['fruits','dairy','drinks','snacks'].includes(f.cat)],
+  [/\b(spicy|teekha|tikha|chatpata|masaledar)\b/, f=>/chilli|masala|tikka|chole|rajma|curry|bhurji|chaat|pav bhaji|biryani|kadai|tandoori|keema|sambar|manchurian|schezwan/i.test(f.name)],
+  [/\b(sweet|dessert|meetha|mitha|sugar craving)\b/, f=>f.cat==='sweets' || ['fruit','curdbowl','dates','milkdates','bananashake','sweetdaliya','fruitchaat','banana','apple','papaya'].includes(f.id)],
+  [/\b(comfort|ghar ka|homely|home food|simple|sada)\b/, f=>/khichdi|dal|rajma chawal|curd rice|kadhi|paratha|roti|poha|upma|chawal/i.test(f.name)],
+  [/\b(healthy|clean|diet)\b/, f=>f.kcal<=450 && (f.p>=12 || f.fib>=6)],
+  [/\b(street|chaat|junk|outside|bahar)\b/, f=>['street','snacks'].includes(f.cat)],
+  [/\b(iron|anemia|haemoglobin|hemoglobin)\b/, f=>f.fe>=4],
+  [/\b(b12|b 12)\b/, f=>f.b12>=1],
+  [/\b(vitamin d|vit d|d3)\b/, f=>f.d>=2],
+  [/\b(fibre|fiber|digestion)\b/, f=>f.fib>=6],
+  [/\b(calcium|bones)\b/, f=>f.ca>=250],
+  [/\b(veg|vegetarian|no meat)\b/, f=>f.diet==='veg'],
+  [/\b(non veg|nonveg|meat)\b/, f=>f.diet==='nonveg'],
+];
+const ASK_SLOTWORD={breakfast:'b',nashta:'b',lunch:'l',snack:'s',evening:'s',dinner:'d',raat:'d'};
+const ASK_STOP=new Set('i want something some feel like eating eat to have a an the for me my please and or with kuch khana hai chahiye hain ka ki ke today now right abhi bhi food craving craving dish meal options option give suggest show me good nice tasty yummy mood'.split(' '));
+let askHistory=[], askCalm=false;
+function askSlot(q){ for(const w in ASK_SLOTWORD){ if(new RegExp('\\b'+w+'\\b').test(q)) return ASK_SLOTWORD[w]; } const c=isToday()?currentSlot():'l'; return c; }
+function askFind(q){
+  q=(q||'').toLowerCase().trim();
+  const slotK=askSlot(q), slot=SLOTS.find(s=>s.k===slotK);
+  const T=targets(), eaten=effTotals(sum(S.day.meals),T,S.date).e; const gaps={}; for(const k in T) gaps[k]=Math.max(0,T[k]-eaten[k]);
+  const eatenIds=new Set(S.day.meals.flatMap(m=>m.foodIds||[m.foodId]).filter(Boolean));
+  const share=Math.max(.2,slot.share), budget=Math.max(180,gaps.kcal*Math.min(.45,share*1.3));
+  let pool=FOODS.filter(f=>dietOk(f) && f.cat!=='supplements' && f.cat!=='mine' && !f.id.startsWith('t_') && !['whey','milkwhey'].includes(f.id) && !(f.tags||[]).includes('sugary'));
+  const intents=ASK_INTENTS.filter(([re])=>re.test(q)).map(([,fn])=>fn);
+  let words=q.replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>2 && !ASK_STOP.has(w) && !ASK_INTENTS.some(([re])=>re.test(w)) && !ASK_SLOTWORD[w]);
+  let note='';
+  if(!q) pool=pool.filter(f=>f.plan && f.slots.includes(slotK));
+  else {
+    let p2=pool.filter(f=>intents.every(fn=>fn(f)));
+    const wantsTreat=/\b(street|chaat|junk|outside|bahar|sweet|dessert|meetha|mitha|sugar)\b/.test(q);
+    if(words.length){ const byWord=p2.filter(f=>words.some(w=>(f.name+' '+f.aliases.join(' ')).toLowerCase().includes(w.replace(/s$/,'')))); if(byWord.length) p2=byWord; else if(!wantsTreat) p2=p2.filter(f=>!['street','sweets'].includes(f.cat)); else if(!intents.length) note=`I couldn't find "${words.join(' ')}" in Santulan yet, so here's the best balanced pick for now.`; }
+    if(!words.length && !wantsTreat) p2=p2.filter(f=>!['street','sweets'].includes(f.cat));
+    if(!p2.length){ note=note||"Nothing matched all of that, so here's the closest balanced pick."; p2=pool.filter(f=>f.plan && f.slots.includes(slotK)); }
+    const anyTime=/\b(sweet|dessert|meetha|mitha|sugar|snack|quick|fast|jaldi)\b/.test(q) || words.length;
+    pool=(!anyTime && p2.filter(f=>f.slots.includes(slotK)).length>=3) ? p2.filter(f=>f.slots.includes(slotK)) : p2;
+  }
+  const pf=S.profile||{}, nvFew=(pf.diet||'nonvegfew')!=='nonveg';
+  const ranked=pool.map(f=>{ let sc=scoreFood(f,gaps,T,share,budget,eatenIds,slotK); if(nvFew && f.diet==='nonveg') sc*=0.85; if(f.plan) sc+=0.05; if(/\b(sweet|dessert|meetha|mitha|sugar)\b/.test(q) && f.cat!=='sweets') sc+=0.6; if(/\b(light|halka|halki)\b/.test(q)) sc-=f.kcal/1500; if(/\b(comfort|ghar ka|homely|home food|simple|sada)\b/.test(q) && /khichdi|dal chawal|curd rice|rajma chawal|kadhi chawal|dal tadka|moong dal/i.test(f.name)) sc+=0.5; return {f,sc}; }).sort((a,b)=>b.sc-a.sc);
+  const out=[], cats=new Set();
+  for(const r of ranked){ if(out.length>=7) break; if(out.length>1 && cats.has(r.f.cat) && ranked.length>12 && out.filter(x=>x.f.cat===r.f.cat).length>=2) continue; out.push(r); cats.add(r.f.cat); }
+  const nut={p:'protein',b12:'B12',d:'vitamin D',fe:'iron',fib:'fibre',ca:'calcium'};
+  const why=f=>{ const focus=Object.keys(nut).map(k=>({k,v:gaps[k]>0?Math.min(f[k],gaps[k])/T[k]:0})).filter(x=>x.v>0.08).sort((a,b)=>b.v-a.v).slice(0,2).map(x=>nut[x.k]); return focus; };
+  const missed=SLOTS.slice(0,SLOTS.indexOf(slot)).filter(x=>!S.day.meals.some(m=>m.slot===x.k) && (S.day.skipped.includes(x.k) || (isToday() && x.end<=nowHour())));
+  return {slot, out, why, missed, note, gaps, T, q};
+}
+function askCard(r,res){
+  const f=r.f, focus=res.why(f), has=RECIPES.some(x=>x.id===f.id);
+  const chips=[`${fmt(f.kcal)} kcal`,`${fmt(f.p)} g protein`].concat(f.tags.filter(t=>t!=='protein').map(t=>TAGNAME[t]));
+  let reason = focus.length ? `Covers the <b>${focus.join('</b> and <b>')}</b> you still need today.` : 'A light, balanced choice for where your day is.';
+  if(res.missed.length && !/\b(light|halka|halki|sweet|dessert|meetha|snack|quick)\b/.test(res.q)) reason=`You ${S.day.skipped.includes(res.missed[res.missed.length-1].k)?'skipped':'missed'} ${res.missed.map(x=>x.name.toLowerCase()).join(' and ')}, so this is a little more filling. `+reason;
+  return `<div class="ask-match" style="--d:.15s"><div class="ask-match-in">
+    <span class="ask-tag">✦ ${res.q?'Your perfect pick':`Your perfect ${res.slot.name.toLowerCase()} match`}</span>
+    <h3>${esc(f.name)}</h3><div class="ask-meta">${esc(f.serving)}${f.diet==='veg'?' · 🌱 veg':f.diet==='egg'?' · 🥚 egg':' · non-veg'}${has?` · ⏱ ${RECIPES.find(x=>x.id===f.id).time} min`:''}</div>
+    <div class="ask-chipsrow">${chips.map(c=>`<span>${esc(c)}</span>`).join('')}</div>
+    <p class="ask-why">${reason} That keeps your day in santulan.</p>
+    <div class="ask-acts"><button class="ask-btn" data-asklog="${f.id}">＋ Log it</button>${has?`<button class="ask-btn ghost" data-askcook="${f.id}">How to cook</button>`:''}</div>
+  </div></div>`;
+}
+function askAlt(r,res,i){ const f=r.f, focus=res.why(f), has=RECIPES.some(x=>x.id===f.id);
+  return `<div class="ask-alt" style="--d:${.35+i*.08}s"><b>${esc(f.name)}</b><small>${esc(f.serving)} · ${fmt(f.kcal)} kcal · ${fmt(f.p)} g protein</small><span class="why">${focus.length?'Good for '+focus.join(' & '):'Light and balanced'}</span>
+    <div class="ask-mini"><button data-asklog="${f.id}">＋ Log</button>${has?`<button class="ghost" data-askcook="${f.id}">Cook</button>`:''}</div></div>`; }
+function askRender(q, thinking){
+  const body=document.getElementById('askBody'), ov=document.getElementById('askOverlay'); if(!body) return;
+  const first=(S.name||'').trim().split(' ')[0];
+  let h=`<div class="ask-hero ${askCalm?'calm':''}"><div class="ask-orb" aria-hidden="true"><i></i><i></i><i></i></div><p class="ask-hi">Hi${first?' '+esc(first):''}!</p><p class="ask-q">What do you feel like eating?</p></div>`;
+  askHistory.forEach(x=>{ h+=`<div class="ask-you">${esc(x)}</div>`; });
+  if(thinking){ ov.classList.add('thinking'); body.innerHTML=h+`<div class="ask-skel"></div><div class="ask-skel sm"></div>`; return; }
+  ov.classList.remove('thinking');
+  const res=askFind(q); setTimeout(()=>{ askCalm=true; },1500);
+  if(!res.out.length){ body.innerHTML=h+`<p class="ask-empty">I couldn't find a good match. Try “something light” or “high protein”.</p>`; return; }
+  h+=(res.note?`<p class="ask-empty">${esc(res.note)}</p>`:'')+askCard(res.out[0],res);
+  if(res.out.length>1) h+=`<p class="ask-sec" style="--d:.3s">${res.q?'More options you might like':`More ${res.slot.name.toLowerCase()} options you might like`}</p><div class="ask-row">${res.out.slice(1).map((r,i)=>askAlt(r,res,i)).join('')}</div>`;
+  body.innerHTML=h;
+}
+function askRun(q){ if(q){ askHistory=[q]; } askRender(q,true); const sc=document.getElementById('askScroll'); if(sc) sc.scrollTo({top:0,behavior:'smooth'}); setTimeout(()=>askRender(q,false), q?750:1100); }
+function openAsk(el){
+  const ov=document.getElementById('askOverlay'); if(!ov) return;
+  const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null;
+  ov.style.setProperty('--ox', r?`${r.left+30}px`:'50%'); ov.style.setProperty('--oy', r?`${r.top+r.height/2}px`:'50%');
+  askHistory=[]; askCalm=false; document.getElementById('askText').value='';
+  document.getElementById('askChips').innerHTML=ASK_CHIPS.map(([l,q],i)=>`<button data-askq="${q}" style="--d:${.6+i*.05}s">${l}</button>`).join('');
+  ov.classList.remove('closing'); ov.hidden=false; void ov.offsetWidth; ov.classList.add('open'); haptic();
+  document.body.style.overflow='hidden'; askRun('');
+  try{ history.pushState({ask:1},''); }catch(e){}
+  track('ask_open');
+}
+function closeAsk(){ const ov=document.getElementById('askOverlay'); if(!ov||ov.hidden) return; ov.classList.add('closing'); ov.classList.remove('open'); document.body.style.overflow=''; setTimeout(()=>{ ov.hidden=true; ov.classList.remove('closing'); if(S.screen==='home') renderHome(); },460); }
+window.addEventListener('popstate',()=>{ const ov=document.getElementById('askOverlay'); if(ov && !ov.hidden) closeAsk(); });
+document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.id==='askOpen'){ openAsk(t); }
+  else if(t.id==='askClose'){ try{ history.back(); }catch(err){ closeAsk(); } setTimeout(closeAsk,50); }
+  else if(t.dataset.askq){ const q=t.textContent; askRun(q.toLowerCase()==='quick, 10 min'?'quick':q.toLowerCase()); track('ask_chip',{q:t.dataset.askq}); }
+  else if(t.dataset.asklog){ const slot=askSlot((askHistory[0]||'').toLowerCase()); const f=addFood(t.dataset.asklog, slot); if(f){ toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.classList.add('done'); t.textContent='✓ Logged'; t.disabled=true; track('ask_log'); } }
+  else if(t.dataset.askcook){ const id=t.dataset.askcook; closeAsk(); setTimeout(()=>openRecipes(id,'home'),300); }
+  else if(t.id==='askMic'){ askVoice(t); }
+});
+document.addEventListener('submit',e=>{ if(e.target.id!=='askForm') return; e.preventDefault(); const i=document.getElementById('askText'); const q=i.value.trim(); if(!q) return; i.blur(); askRun(q); track('ask_query'); });
+let askRec=null;
+function askVoice(btn){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast("Voice isn't available in this browser.",true); return; }
+  if(askRec){ try{ askRec.stop(); }catch(e){} return; }
+  askRec=new SR(); askRec.lang='en-IN'; askRec.interimResults=true; btn.classList.add('listening');
+  askRec.onresult=ev=>{ const t=[...ev.results].map(r=>r[0].transcript).join(' '); document.getElementById('askText').value=t; if(ev.results[ev.results.length-1].isFinal && t.trim()) askRun(t.trim()); };
+  askRec.onend=()=>{ askRec=null; btn.classList.remove('listening'); };
+  try{ askRec.start(); }catch(e){ askRec=null; btn.classList.remove('listening'); }
+}
 
 /* ---------- startup splash ---------- */
 let splashDone=false;
