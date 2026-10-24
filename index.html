@@ -1879,6 +1879,10 @@ async function preloadWeek(k){ for(let i=1;i<7;i++){ try{ await loadDay(shiftKey
 
 
 /* ---------- Ask Santulan: the right meal for right now ---------- */
+// subtle haptics synced to the animation (Android; iPhones ignore vibration on the web)
+const buzz=p=>{ try{ if(navigator.vibrate && !(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)) navigator.vibrate(p); }catch(e){} };
+let askPulseT=null;
+function askPulse(on){ clearInterval(askPulseT); askPulseT=null; if(on){ let n=0; askPulseT=setInterval(()=>{ buzz(4); if(++n>=4){ clearInterval(askPulseT); askPulseT=null; } },320); } }
 const ASK_CHIPS=[['Something light','light'],['High protein','protein'],['Quick, 10 min','quick'],['Spicy','spicy'],['Sweet craving','sweet'],['Comfort food','comfort'],['Healthy street food','street'],['More iron','iron']];
 const ASK_INTENTS=[
   [/\b(light|halka|halki|small|chhota|thoda)\b/, f=>f.kcal<=350],
@@ -1952,8 +1956,8 @@ function askRender(q, thinking){
   const first=(S.name||'').trim().split(' ')[0];
   let h=`<div class="ask-hero ${askCalm?'calm':''}"><div class="ask-orb" aria-hidden="true"><i></i><i></i><i></i></div><p class="ask-hi">Hi${first?' '+esc(first):''}!</p><p class="ask-q">What do you feel like eating?</p></div>`;
   askHistory.forEach(x=>{ h+=`<div class="ask-you">${esc(x)}</div>`; });
-  if(thinking){ ov.classList.add('thinking'); body.innerHTML=h+`<div class="ask-skel"></div><div class="ask-skel sm"></div>`; return; }
-  ov.classList.remove('thinking');
+  if(thinking){ ov.classList.add('thinking'); askPulse(true); body.innerHTML=h+`<div class="ask-skel"></div><div class="ask-skel sm"></div>`; return; }
+  ov.classList.remove('thinking'); askPulse(false); setTimeout(()=>buzz([10,45,14]),180);
   const res=askFind(q); setTimeout(()=>{ askCalm=true; },1500);
   if(!res.out.length){ body.innerHTML=h+`<p class="ask-empty">I couldn't find a good match. Try “something light” or “high protein”.</p>`; return; }
   h+=(res.note?`<p class="ask-empty">${esc(res.note)}</p>`:'')+askCard(res.out[0],res);
@@ -1967,18 +1971,19 @@ function openAsk(el){
   ov.style.setProperty('--ox', r?`${r.left+30}px`:'50%'); ov.style.setProperty('--oy', r?`${r.top+r.height/2}px`:'50%');
   askHistory=[]; askCalm=false; document.getElementById('askText').value='';
   document.getElementById('askChips').innerHTML=ASK_CHIPS.map(([l,q],i)=>`<button data-askq="${q}" style="--d:${.6+i*.05}s">${l}</button>`).join('');
-  ov.classList.remove('closing'); ov.hidden=false; void ov.offsetWidth; ov.classList.add('open'); haptic();
+  ov.classList.remove('closing'); ov.hidden=false; void ov.offsetWidth; ov.classList.add('open'); buzz(8); setTimeout(()=>buzz([5,60,5,60,8]),160);
   document.body.style.overflow='hidden'; askRun('');
   try{ history.pushState({ask:1},''); }catch(e){}
   track('ask_open');
 }
-function closeAsk(){ const ov=document.getElementById('askOverlay'); if(!ov||ov.hidden) return; ov.classList.add('closing'); ov.classList.remove('open'); document.body.style.overflow=''; setTimeout(()=>{ ov.hidden=true; ov.classList.remove('closing'); if(S.screen==='home') renderHome(); },460); }
+function closeAsk(){ const ov=document.getElementById('askOverlay'); if(!ov||ov.hidden||ov.classList.contains('closing')) return; askPulse(false); buzz(6); ov.classList.add('closing'); ov.classList.remove('open'); document.body.style.overflow=''; setTimeout(()=>{ ov.hidden=true; ov.classList.remove('closing'); if(S.screen==='home') renderHome(); },460); }
 window.addEventListener('popstate',()=>{ const ov=document.getElementById('askOverlay'); if(ov && !ov.hidden) closeAsk(); });
 document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='askOpen'){ openAsk(t); }
+  else if(t.closest('#askOverlay') && t.dataset.askcook){ buzz(6); }
   else if(t.id==='askClose'){ try{ history.back(); }catch(err){ closeAsk(); } setTimeout(closeAsk,50); }
-  else if(t.dataset.askq){ const q=t.textContent; askRun(q.toLowerCase()==='quick, 10 min'?'quick':q.toLowerCase()); track('ask_chip',{q:t.dataset.askq}); }
-  else if(t.dataset.asklog){ const slot=askSlot((askHistory[0]||'').toLowerCase()); const f=addFood(t.dataset.asklog, slot); if(f){ toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.classList.add('done'); t.textContent='✓ Logged'; t.disabled=true; track('ask_log'); } }
+  else if(t.dataset.askq){ buzz(6); const q=t.textContent; askRun(q.toLowerCase()==='quick, 10 min'?'quick':q.toLowerCase()); track('ask_chip',{q:t.dataset.askq}); }
+  else if(t.dataset.asklog){ const slot=askSlot((askHistory[0]||'').toLowerCase()); const f=addFood(t.dataset.asklog, slot); if(f){ buzz([12,40,22]); toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.classList.add('done'); t.textContent='✓ Logged'; t.disabled=true; track('ask_log'); } }
   else if(t.dataset.askcook){ const id=t.dataset.askcook; closeAsk(); setTimeout(()=>openRecipes(id,'home'),300); }
   else if(t.id==='askMic'){ askVoice(t); }
 });
