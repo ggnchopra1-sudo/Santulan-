@@ -2899,9 +2899,7 @@
    "aliases": [
     "salad",
     "kachumber",
-    "green salad",
-    "kheera",
-    "cucumber"
+    "green salad"
    ],
    "cat": "sides",
    "slots": "ld",
@@ -7510,6 +7508,58 @@
    "d": 0.1,
    "fe": 1.6,
    "ca": 320.0
+  },
+  {
+   "id": "eggstoast",
+   "name": "Eggs on toast",
+   "aliases": [
+    "eggs on toast",
+    "egg on toast",
+    "sunny side up on toast",
+    "fried egg toast",
+    "fried eggs on toast",
+    "egg toast"
+   ],
+   "cat": "breakfast",
+   "slots": "bs",
+   "diet": "egg",
+   "dairy": false,
+   "plan": true,
+   "serving": "2 eggs + 2 toast",
+   "kcal": 380.0,
+   "p": 18.0,
+   "c": 28.0,
+   "f": 21.0,
+   "fib": 3.0,
+   "b12": 1.1,
+   "d": 2.2,
+   "fe": 2.4,
+   "ca": 90.0
+  },
+  {
+   "id": "cucumber",
+   "name": "Cucumber (kheera)",
+   "aliases": [
+    "cucumber",
+    "kheera",
+    "khira",
+    "cucumbers"
+   ],
+   "cat": "sides",
+   "slots": "bls",
+   "diet": "veg",
+   "dairy": false,
+   "plan": false,
+   "serving": "1 medium",
+   "kcal": 30.0,
+   "p": 1.4,
+   "c": 7.0,
+   "f": 0.2,
+   "fib": 1.0,
+   "b12": 0.0,
+   "d": 0.0,
+   "fe": 0.6,
+   "ca": 30.0
   }
  ]
 }
