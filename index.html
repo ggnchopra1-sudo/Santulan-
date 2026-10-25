@@ -2011,11 +2011,10 @@ function closeAsk(){ const ov=document.getElementById('askOverlay'); if(!ov||ov.
 window.addEventListener('popstate',()=>{ const ov=document.getElementById('askOverlay'); if(ov && !ov.hidden) closeAsk(); });
 document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='askOpen'){ openAsk(t); }
-  else if(t.closest('#askOverlay') && t.dataset.askcook){ buzz(6); }
   else if(t.id==='askClose'){ try{ history.back(); }catch(err){ closeAsk(); } setTimeout(closeAsk,50); }
   else if(t.dataset.askq){ buzz(6); const q=t.textContent; askRun(q.toLowerCase()==='quick, 10 min'?'quick':q.toLowerCase()); track('ask_chip',{q:t.dataset.askq}); }
   else if(t.dataset.asklog){ const slot=askSlot((askHistory[0]||'').toLowerCase()); const f=addFood(t.dataset.asklog, slot); if(f){ buzz([12,40,22]); toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.classList.add('done'); t.textContent='✓ Logged'; t.disabled=true; track('ask_log'); } }
-  else if(t.dataset.askcook){ const id=t.dataset.askcook; closeAsk(); setTimeout(()=>openRecipes(id,'home'),300); }
+  else if(t.dataset.askcook){ const id=t.dataset.askcook; buzz(6); track('ask_cook',{id}); try{ history.back(); }catch(err){} setTimeout(closeAsk,50); setTimeout(()=>openRecipes(id,'home'),350); }
   else if(t.id==='askMic'){ askVoice(t); }
 });
 document.addEventListener('submit',e=>{ if(e.target.id!=='askForm') return; e.preventDefault(); const i=document.getElementById('askText'); const q=i.value.trim(); if(!q) return; i.blur(); askRun(q); track('ask_query'); });
