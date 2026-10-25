@@ -763,8 +763,12 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 @keyframes sparkle{0%,100%{transform:scale(1) rotate(0);opacity:.7}50%{transform:scale(1.25) rotate(20deg);opacity:1}}
 
 #askOverlay{position:fixed;inset:0;z-index:70;background:#06150E;color:#EEF6E8;display:flex;flex-direction:column;clip-path:circle(0 at var(--ox,50%) var(--oy,50%));transition:clip-path .75s cubic-bezier(.7,0,.2,1);overflow:hidden}
-#askOverlay.open{clip-path:circle(150% at var(--ox,50%) var(--oy,50%))}
-#askOverlay.closing{transition:clip-path .45s cubic-bezier(.6,0,.4,1);clip-path:circle(0 at var(--ox,50%) var(--oy,50%))}
+#askOverlay.open{clip-path:circle(var(--or,150%) at var(--ox,50%) var(--oy,50%))}
+#askOverlay.closing{transition:clip-path .5s cubic-bezier(.55,0,.25,1);clip-path:circle(0 at var(--ox,50%) var(--oy,50%));pointer-events:none}
+#askOverlay.closing>*{transition:opacity .25s ease;opacity:0}
+#askOverlay.away{clip-path:circle(var(--or,150%) at var(--ox,50%) var(--oy,50%));transition:opacity .32s ease,transform .32s cubic-bezier(.4,0,.2,1);opacity:0;transform:scale(1.04);pointer-events:none}
+.screen-in{animation:scrIn .38s cubic-bezier(.2,.8,.2,1) both}@keyframes scrIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen-in{animation:none}}
 .ask-aurora{position:absolute;inset:0;pointer-events:none;filter:blur(60px);opacity:.75}
 .ask-aurora i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;mix-blend-mode:screen}
 .ask-aurora i:nth-child(1){background:radial-gradient(circle,#2E7D4F 0,transparent 60%);left:-30vmax;top:-25vmax;animation:aur1 14s ease-in-out infinite alternate}
@@ -1999,7 +2003,7 @@ function askRun(q){ if(q){ askHistory=[q]; } askRender(q,true); const sc=documen
 function openAsk(el){
   const ov=document.getElementById('askOverlay'); if(!ov) return;
   const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null;
-  ov.style.setProperty('--ox', r?`${r.left+30}px`:'50%'); ov.style.setProperty('--oy', r?`${r.top+r.height/2}px`:'50%');
+  const ox=r?r.left+30:innerWidth/2, oy=r?r.top+r.height/2:innerHeight/2; ov.style.setProperty('--ox', ox+'px'); ov.style.setProperty('--oy', oy+'px'); ov.style.setProperty('--or', Math.ceil(Math.hypot(Math.max(ox,innerWidth-ox),Math.max(oy,innerHeight-oy)))+2+'px'); askDirty=false;
   askHistory=[]; askCalm=false; document.getElementById('askText').value='';
   document.getElementById('askChips').innerHTML=ASK_CHIPS.map(([l,q],i)=>`<button data-askq="${q}" style="--d:${.6+i*.05}s">${l}</button>`).join('');
   ov.classList.remove('closing'); ov.hidden=false; void ov.offsetWidth; ov.classList.add('open'); buzz(8); setTimeout(()=>buzz([5,60,5,60,8]),160);
@@ -2007,14 +2011,20 @@ function openAsk(el){
   try{ history.pushState({ask:1},''); }catch(e){}
   track('ask_open');
 }
-function closeAsk(){ const ov=document.getElementById('askOverlay'); if(!ov||ov.hidden||ov.classList.contains('closing')) return; askPulse(false); buzz(6); ov.classList.add('closing'); ov.classList.remove('open'); document.body.style.overflow=''; setTimeout(()=>{ ov.hidden=true; ov.classList.remove('closing'); if(S.screen==='home') renderHome(); },460); }
+let askDirty=false, askNext=null;
+function closeAsk(){ const ov=document.getElementById('askOverlay'); if(!ov||ov.hidden||ov.classList.contains('closing')||ov.classList.contains('away')) return; askPulse(false); buzz(6); document.body.style.overflow='';
+  const next=askNext; askNext=null;
+  if(next){ next(); ov.classList.add('away'); }            // going somewhere else: show it underneath, then fade the panel off
+  else { if(askDirty && S.screen==='home') renderHome(); ov.classList.add('closing'); ov.classList.remove('open'); }   // back home: refresh underneath first, then the ripple
+  askDirty=false;
+  setTimeout(()=>{ ov.hidden=true; ov.classList.remove('closing','away','open'); },next?340:520); }
 window.addEventListener('popstate',()=>{ const ov=document.getElementById('askOverlay'); if(ov && !ov.hidden) closeAsk(); });
 document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='askOpen'){ openAsk(t); }
   else if(t.id==='askClose'){ try{ history.back(); }catch(err){ closeAsk(); } setTimeout(closeAsk,50); }
   else if(t.dataset.askq){ buzz(6); const q=t.textContent; askRun(q.toLowerCase()==='quick, 10 min'?'quick':q.toLowerCase()); track('ask_chip',{q:t.dataset.askq}); }
-  else if(t.dataset.asklog){ const slot=askSlot((askHistory[0]||'').toLowerCase()); const f=addFood(t.dataset.asklog, slot); if(f){ buzz([12,40,22]); toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.classList.add('done'); t.textContent='✓ Logged'; t.disabled=true; track('ask_log'); } }
-  else if(t.dataset.askcook){ const id=t.dataset.askcook; buzz(6); track('ask_cook',{id}); try{ history.back(); }catch(err){} setTimeout(closeAsk,50); setTimeout(()=>openRecipes(id,'home'),350); }
+  else if(t.dataset.asklog){ const slot=askSlot((askHistory[0]||'').toLowerCase()); const f=addFood(t.dataset.asklog, slot); if(f){ askDirty=true; buzz([12,40,22]); toast(`Added ${f.name} to ${SLOTS.find(s=>s.k===slot).name.toLowerCase()}`); t.classList.add('done'); t.textContent='✓ Logged'; t.disabled=true; track('ask_log'); } }
+  else if(t.dataset.askcook){ const id=t.dataset.askcook; track('ask_cook',{id}); askNext=()=>{ openRecipes(id,'home'); const sc=document.getElementById('recBody'); if(sc){ sc.classList.remove('screen-in'); void sc.offsetWidth; sc.classList.add('screen-in'); } }; try{ history.back(); }catch(err){} setTimeout(closeAsk,60); }
   else if(t.id==='askMic'){ askVoice(t); }
 });
 document.addEventListener('submit',e=>{ if(e.target.id!=='askForm') return; e.preventDefault(); const i=document.getElementById('askText'); const q=i.value.trim(); if(!q) return; i.blur(); askRun(q); track('ask_query'); });
