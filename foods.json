@@ -7950,6 +7950,86 @@
    "d": 0.0,
    "fe": 0.2,
    "ca": 8.0
+  },
+  {
+   "id": "chyawanprash",
+   "name": "Chyawanprash",
+   "aliases": [
+    "chyawanprash",
+    "chyavanprash",
+    "chyawan prash",
+    "chywanprash",
+    "chawanprash",
+    "chyawanprash spoon",
+    "chyawanprash teaspoon",
+    "dabur chyawanprash"
+   ],
+   "cat": "ayurveda",
+   "slots": "bsd",
+   "diet": "veg",
+   "dairy": true,
+   "plan": false,
+   "serving": "1 teaspoon (10 g)",
+   "kcal": 34.0,
+   "p": 0.1,
+   "c": 7.6,
+   "f": 0.25,
+   "fib": 0.2,
+   "b12": 0.0,
+   "d": 0.0,
+   "fe": 0.2,
+   "ca": 5.0
+  },
+  {
+   "id": "chyawanprashtbsp",
+   "name": "Chyawanprash (tablespoon)",
+   "aliases": [
+    "tbsp chyawanprash",
+    "tablespoon chyawanprash",
+    "chyawanprash tablespoon",
+    "chyawanprash tbsp",
+    "bada chammach chyawanprash"
+   ],
+   "cat": "ayurveda",
+   "slots": "bsd",
+   "diet": "veg",
+   "dairy": true,
+   "plan": false,
+   "serving": "1 tablespoon (20 g)",
+   "kcal": 68.0,
+   "p": 0.2,
+   "c": 15.2,
+   "f": 0.5,
+   "fib": 0.4,
+   "b12": 0.0,
+   "d": 0.0,
+   "fe": 0.4,
+   "ca": 10.0
+  },
+  {
+   "id": "chyawanprashsf",
+   "name": "Sugar-free chyawanprash",
+   "aliases": [
+    "sugar free chyawanprash",
+    "sugarfree chyawanprash",
+    "chyawanprash sugar free",
+    "sugar-free chyawanprash"
+   ],
+   "cat": "ayurveda",
+   "slots": "bsd",
+   "diet": "veg",
+   "dairy": true,
+   "plan": false,
+   "serving": "1 teaspoon (10 g)",
+   "kcal": 20.0,
+   "p": 0.2,
+   "c": 4.0,
+   "f": 0.4,
+   "fib": 0.6,
+   "b12": 0.0,
+   "d": 0.0,
+   "fe": 0.2,
+   "ca": 5.0
   }
  ]
 }
