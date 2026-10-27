@@ -855,6 +855,8 @@ button,input,textarea{-webkit-tap-highlight-color:transparent}
 .sauce-chips button small{font-weight:500;color:var(--muted);margin-left:4px}
 .cheat{margin-top:6px}
 .cheat .plan-slot h3::after{content:" ✦";color:var(--olive)}
+.daypick{margin-bottom:6px}
+.daypick button{min-width:96px}
 </style>
 </head>
 <body>
@@ -1211,7 +1213,8 @@ let logStep='input', slotOpen=false, filterOpen=false;
 let logSlot = 'b', logPortion = 1, logFilter = 'all', aiPreview = null, aiPlanText = '', logDone = null, logReturn = 'home';
 let factIdx = (Math.floor(Date.now()/86400000)) % FACTS.length;
 
-function todayKey(d=new Date()){ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function todayKey(d=new Date(Date.now()-4*3600e3)){  // the app's day ends at 4 am
+ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function keyToDate(k){ const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d); }
 function shiftKey(k,n){ const d=keyToDate(k); d.setDate(d.getDate()+n); return todayKey(d); }
 function emptyDay(){ return { meals:[], skipped:[], water:0 }; }
@@ -1219,7 +1222,7 @@ function isToday(){ return S.date===todayKey(); }
 function vegDays(){ return (S.profile&&Array.isArray(S.profile.vegDays))?S.profile.vegDays:[]; }
 function isVegDay(k=S.date){ return vegDays().includes(keyToDate(k).getDay()); }
 function vegDayName(k=S.date){ return keyToDate(k).toLocaleDateString('en-IN',{weekday:'long'}); }
-function nowHour(){ const d=new Date(); return d.getHours()+d.getMinutes()/60; }
+function nowHour(){ const d=new Date(), h=d.getHours()+d.getMinutes()/60; return h<4 ? h+24 : h; }
 function targets(){
   const p=S.profile||{}, w=S.weight||68;
   const factor={sitting:29,none:28,mixed:31,workout23:33,workout4:36}[p.activity]||31;
@@ -2065,6 +2068,7 @@ setTimeout(hideSplash,4000);
 
 function show(name){
   if(name!=='load') hideSplash();
+  if(name==='home' && S.date && S.date!==todayKey()){ const k=todayKey(); S.date=k; if(S.cache[k]) S.day=S.cache[k]; else loadDay(k).then(d=>{ if(S.date===k){ S.day=d; if(S.screen==='home') renderHome(); } }); }
   S.screen=name; for(const k in scr) scr[k].hidden = k!==name;
   window.scrollTo({top:0});
   if(name==='home') renderHome(); else if(name==='dash') render(); else if(name==='log') renderLog(); else if(name==='onb') renderOnb(); else if(name==='recipes') renderRecipes();
@@ -2078,7 +2082,7 @@ function renderHome(){
   const h=new Date().getHours();
   const greet = h<5?'Good night': h<12?'Good morning': h<17?'Good afternoon':'Good evening';
   document.getElementById('hello').innerHTML = `${greet},<br><span>${esc(S.name||'there')}</span>`;
-  document.getElementById('homeDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('homeDate').textContent = keyToDate(todayKey()).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
   const vegNote = isVegDay(todayKey()) ? `It's ${vegDayName(todayKey())}, a veg day. ` : '';
   const sub = h<11 ? 'Start with a breakfast that has some protein in it.' : h<16 ? 'Keep your lunch on time today.' : h<20 ? 'A light evening snack keeps dinner from turning into a feast.' : 'Wind down early. Good sleep is half of tomorrow\'s energy.';
   document.getElementById('helloSub').textContent = sickGet() ? 'Take it easy today. Santulan has switched to rest mode.' : vegNote + sub;
@@ -2257,6 +2261,7 @@ function renderLog(){
   const slot=SLOTS.find(s=>s.k===logSlot);
   const pastNote = !isToday() ? `<span class="pastday">${esc(dateLabel(S.date))}</span>` : '';
   const slotHtml = `<div class="slotline"><button class="slotchip" id="slotChip" aria-expanded="${slotOpen}">For <b>${slot.name}</b><span class="caret" aria-hidden="true">▾</span></button>${pastNote}</div>
+    ${slotOpen?`<div class="slotpick daypick"><button aria-pressed="${S.date===todayKey()}" data-lday="0">Today</button><button aria-pressed="${S.date===shiftKey(todayKey(),-1)}" data-lday="-1">Yesterday</button></div>`:''}
     ${slotOpen?`<div class="slotpick">${SLOTS.map(s=>`<button aria-pressed="${s.k===logSlot}" data-lslot="${s.k}">${s.name}${loggedCount(s.k)?` <small>${loggedCount(s.k)}</small>`:''}</button>`).join('')}</div>`:''}`;
   let h='';
   if(logStep==='review'){
@@ -2674,6 +2679,7 @@ document.getElementById('logBody').addEventListener('click',async e=>{
   else if(t.id==='filterBtn'){ filterOpen=!filterOpen; renderLog(); }
   else if(t.dataset.lstep){ logStep=t.dataset.lstep; renderLog(); window.scrollTo({top:0}); if(logStep==='list') setTimeout(()=>{ const si=document.getElementById('lsearch'); if(si) si.focus(); },50); }
   else if(t.dataset.lslot){ logSlot=t.dataset.lslot; slotOpen=false; renderLog(); }
+  else if(t.dataset.lday!=null){ const k=shiftKey(todayKey(),+t.dataset.lday); S.date=k; S.day=await loadDay(k); if(+t.dataset.lday<0 && logSlot!=='d' && !S.day.meals.length) logSlot='d'; renderLog(); }
   else if(t.dataset.lportion){ logPortion=Number(t.dataset.lportion); renderLog(); }
   else if(t.dataset.lfilter){ logFilter=t.dataset.lfilter; renderLog(); }
   else if(t.dataset.addfood){ const f=FOODS.find(x=>x.id===t.dataset.addfood); if(f){ parsed={items:[{food:f,mult:1}],left:[]}; logStep='review'; renderLog(); window.scrollTo({top:0}); } }

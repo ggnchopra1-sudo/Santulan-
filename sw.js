@@ -1,5 +1,5 @@
 // Santulan service worker: app shell works offline; fonts cached after first load.
-const VERSION = 'santulan-v45';
+const VERSION = 'santulan-v46';
 const SHELL = ['./', 'index.html', 'privacy.html', 'manifest.webmanifest',
   'icons/favicon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 
